@@ -1,0 +1,14 @@
+{
+  "id": "iso",
+  "title": "ISO",
+  "basic_theory": "ISO controls how strongly the digital camera responds to available light. It is the digital equivalent of what was traditionally called film speed.",
+  "points": [
+    "Low ISO usually gives a cleaner image.",
+    "High ISO helps in darker conditions or when a fast shutter is needed.",
+    "Very high ISO may introduce noise and reduce detail."
+  ],
+  "teaching_prompt": "If there isn’t enough light for the aperture and shutter speed you want, ISO can help.",
+  "caution": null,
+  "steps": null,
+  "closing": null
+}

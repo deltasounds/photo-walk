@@ -1,0 +1,30 @@
+{
+  "id": "mission-03",
+  "number": 3,
+  "title": "The Horizon Game",
+  "creative_focus": "Line placement, thirds, and balance",
+  "technical_connection": "Zoom, viewpoint, and level framing",
+  "slot_label": "Horizon",
+  "lead_in": "The line can be a horizon, roofline, bridge, wall, street edge, or long shadow.",
+  "prompt": "Photograph the same strong horizontal line three ways: near the bottom third, near the top third, and through the center.",
+  "prompt_options": null,
+  "notice": null,
+  "questions": [
+    "Is the more interesting information above or below the line?",
+    "What changes when you move the line?",
+    "Is the line level?",
+    "Does centering it create useful symmetry?",
+    "Would zooming in make the composition simpler?"
+  ],
+  "technical_reminder": null,
+  "safety_note": null,
+  "variation": [
+    {
+      "condition": null,
+      "text": "Choose your strongest line placement and add a foreground subject, such as a person, sign, plant, shadow, or bicycle."
+    }
+  ],
+  "review_prompt": "Which line placement tells the clearest story, and why?",
+  "partner_activity": null,
+  "review_extra": null
+}

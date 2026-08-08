@@ -1,0 +1,69 @@
+{
+  "id": "troubleshooting",
+  "title": "Quick troubleshooting",
+  "situations": [
+    {
+      "id": "nothing-to-photograph",
+      "situation": "“There’s nothing to photograph.”",
+      "intro": "Offer a noticing prompt:",
+      "items": [
+        "Find something smaller than your hand.",
+        "Find three repeating shapes.",
+        "Look only for shadows.",
+        "Find one bright color.",
+        "Look up, then look down.",
+        "Photograph something most people would ignore."
+      ],
+      "note": null
+    },
+    {
+      "id": "only-one-photograph",
+      "situation": "Takes only one photograph",
+      "intro": "Ask for three variations:",
+      "items": [
+        "Closer or farther away",
+        "Higher or lower",
+        "Horizontal or vertical"
+      ],
+      "note": null
+    },
+    {
+      "id": "shooting-without-looking",
+      "situation": "Photographs continuously without looking",
+      "intro": "Pause them and ask:",
+      "items": [
+        "What is your subject?",
+        "What are you changing between photographs?",
+        "Which version do you predict will work best?"
+      ],
+      "note": null
+    },
+    {
+      "id": "frustrated-by-controls",
+      "situation": "Frustrated by camera controls",
+      "intro": null,
+      "items": null,
+      "note": "Return the camera to aperture priority or an appropriate automatic mode. Ask the participant to concentrate on viewpoint, timing, and composition. Understanding the visual effect matters more than operating everything manually."
+    },
+    {
+      "id": "falling-behind",
+      "situation": "The group is falling behind",
+      "intro": null,
+      "items": null,
+      "note": "Shorten partner sharing to two minutes, but preserve time for photography. If necessary, remove one mission rather than rushing every remaining activity."
+    },
+    {
+      "id": "energy-dropping",
+      "situation": "Energy is dropping",
+      "intro": null,
+      "items": [
+        "Introduce a timed “find three versions” challenge.",
+        "Pair participants differently.",
+        "Offer an unusual viewpoint prompt.",
+        "Let a participant choose the next subject area.",
+        "Move to a visibly different location."
+      ],
+      "note": null
+    }
+  ]
+}

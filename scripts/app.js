@@ -1,0 +1,503 @@
+/* =====================================================================
+   app.js — wiring.
+
+   Holds the three things that are neither pure state nor pure markup:
+   the tick loop, the event delegation, and the sheets.
+
+   Repaint discipline matters here. A full stage rebuild happens only on
+   a step change or a structural edit (a mark added, a pick made). The
+   tick loop touches three text nodes and one width, and nothing else —
+   otherwise typing a collection title while the clock ticks would lose
+   the caret four times a second.
+   ===================================================================== */
+
+import { createTicker, createWakeLock, createCue, formatClock, formatDrift } from './clock.js';
+import { loadContent, createSession, peekStored, clearStored } from './session.js';
+import {
+  renderStage, renderTroubleshooting, renderOverview, renderDriftSheet,
+  collectionsAsText, segmentLabel, captureRow, el,
+} from './render.js';
+
+const $ = (sel) => document.querySelector(sel);
+
+const screenSetup = $('#screen-setup');
+const screenRun   = $('#screen-run');
+const stage       = $('#stage');
+const live        = $('#live');
+const sheet       = $('#sheet');
+const sheetTitle  = $('#sheet-title');
+const sheetBody   = $('#sheet-body');
+
+const DRIFT_ALERT_MS = 3 * 60_000;
+
+let session = null;
+let ticker  = null;
+const wakeLock = createWakeLock();
+const cue      = createCue();
+
+/** Transient view state that is not worth persisting. */
+let ui = { variationRevealed: false };
+let lastPaintedStep = -1;
+
+/* ---------- Boot --------------------------------------------------------- */
+
+async function boot() {
+  let content;
+  try {
+    content = await loadContent();
+  } catch (err) {
+    stage.replaceChildren(el('p', { class: 'note note-warn',
+      text: `Could not load workshop content. ${err.message}` }));
+    showScreen('run');
+    return;
+  }
+
+  session = createSession(content);
+
+  document.querySelector('[data-bind="session-title"]').textContent = content.plan.title;
+  document.querySelector('[data-bind="session-subtitle"]').textContent = content.plan.subtitle ?? '';
+
+  buildSetupScreen();
+  syncSettingsInputs();
+  renderParticipants();
+
+  /* Peek only. The stored session is not adopted until "Resume" is
+     pressed, so anything typed on this screen belongs to a fresh run. */
+  const stored = peekStored(content);
+  if (stored) {
+    $('#resume-summary').textContent = describeStored(stored);
+    $('#resume-note').hidden = false;
+  }
+
+  wireGlobalEvents();
+
+  ticker = createTicker(tick);
+  registerServiceWorker();
+}
+
+/* ---------- Setup screen -------------------------------------------------- */
+
+function buildSetupScreen() {
+  const { copy } = session.content;
+
+  $('#setup-checks').replaceChildren(
+    ...copy.welcome.checks.map((t) => el('li', { text: t })),
+  );
+
+  const seen = new Set();
+  const rows = [];
+  for (const s of session.steps) {
+    if (seen.has(s.segmentIndex)) continue;
+    seen.add(s.segmentIndex);
+    const label = segmentLabel(session, s);
+    const mins = session.steps
+      .filter((x) => x.segmentIndex === s.segmentIndex)
+      .reduce((a, x) => a + x.durationMs, 0) / 60_000;
+    rows.push(el('li', {}, [
+      el('span', { class: 'ov-label', text: label }),
+      el('span', { class: 'ov-min', text: `${Math.round(mins)} min` }),
+    ]));
+  }
+  $('#setup-plan').replaceChildren(...rows);
+}
+
+/** "Mission 3 · Photograph and explore — Ada, Sam · 7 marked" */
+function describeStored(stored) {
+  const where = segmentLabel(session, stored.step);
+  const who = stored.participants.length ? stored.participants.join(', ') : 'no participants';
+  return `${where} — ${who} · ${stored.marks} marked`;
+}
+
+function renderParticipants() {
+  const list = $('#participant-list');
+  const { participants } = session.state;
+  if (!participants.length) {
+    list.replaceChildren(el('li', { class: 'hint', text: 'No participants yet.' }));
+    return;
+  }
+  list.replaceChildren(...participants.map((p) =>
+    el('li', { class: 'chip chip-person' }, [
+      el('span', { text: p.name }),
+      el('button', {
+        type: 'button', class: 'chip-x', 'aria-label': `Remove ${p.name}`,
+        'data-action': 'participant-remove', 'data-id': p.id,
+      }, el('span', { 'aria-hidden': 'true', text: '✕' })),
+    ])));
+}
+
+function syncSettingsInputs() {
+  $('#opt-autoadvance').checked = session.state.settings.autoAdvance;
+  $('#opt-sound').checked = session.state.settings.sound;
+}
+
+/* ---------- Screens ------------------------------------------------------- */
+
+function showScreen(name) {
+  screenSetup.hidden = name !== 'setup';
+  screenRun.hidden = name !== 'run';
+}
+
+async function beginRun({ fresh }) {
+  /* The cue's AudioContext must be created inside the tap that starts
+     the session, or mobile browsers block every later sound. */
+  if (session.state.settings.sound) cue.arm();
+  if (fresh) session.start();
+  await wakeLock.enable();
+  showScreen('run');
+  onStepChange({ silent: true });
+  ticker.start();
+}
+
+/* ---------- Tick ---------------------------------------------------------- */
+
+function tick(t) {
+  if (!session || session.state.status === 'idle') return;
+
+  if (session.shouldAutoAdvance(t)) {
+    session.advance();
+    onStepChange();
+    return;
+  }
+
+  const due = session.dueCue(t);
+  if (due === 'variation') {
+    ui.variationRevealed = true;
+    paint();
+    signal('nudge', [40]);
+    announce('Optional variation available.');
+  }
+
+  updateNumbers(t);
+}
+
+function updateNumbers(t) {
+  const remaining = session.stepRemaining(t);
+  const value = $('#timer-value');
+  if (value) {
+    value.textContent = formatClock(remaining);
+    value.classList.toggle('is-over', remaining < 0);
+  }
+
+  const drift = session.drift(t);
+  const chip = $('#btn-drift');
+  chip.textContent = formatDrift(drift);
+  chip.dataset.state = drift >= DRIFT_ALERT_MS ? 'late'
+                     : drift <= -DRIFT_ALERT_MS ? 'ahead'
+                     : 'ok';
+
+  const pct = Math.max(0, Math.min(1, session.elapsed(t) / session.totalMs));
+  $('#bar-progress-fill').style.width = `${(pct * 100).toFixed(2)}%`;
+}
+
+/* ---------- Painting ------------------------------------------------------ */
+
+function paint() {
+  stage.replaceChildren(renderStage(session, ui));
+  updateChrome();
+  updateNumbers(Date.now());
+}
+
+function updateChrome() {
+  if (session.state.status === 'done') {
+    $('#bar-segment').textContent = session.content.copy.done.title;
+    $('#bar-phase').textContent = '';
+    $('#btn-next').textContent = 'Done';
+    $('#btn-next').disabled = true;
+    $('#btn-back').disabled = false;
+    return;
+  }
+
+  const step = session.step;
+
+  $('#bar-segment').textContent = segmentLabel(session, step, { short: true });
+  $('#bar-phase').textContent = step.phaseCount > 1
+    ? `${step.phaseLabel ?? ''} · ${step.phaseIndex + 1}/${step.phaseCount}`
+    : '';
+
+  const next = $('#btn-next');
+  next.disabled = false;
+  if (session.isLastStep) {
+    next.textContent = 'Finish';
+  } else if (step.isLastPhase) {
+    const upcoming = session.steps.find((s) => s.segmentIndex === step.segmentIndex + 1);
+    next.textContent = `Start ${segmentLabel(session, upcoming, { short: true })} →`;
+  } else {
+    next.textContent = 'Next phase →';
+  }
+
+  $('#btn-back').disabled = session.state.stepIndex === 0;
+}
+
+function onStepChange({ silent = false } = {}) {
+  if (session.state.stepIndex !== lastPaintedStep) {
+    ui.variationRevealed = false;
+    lastPaintedStep = session.state.stepIndex;
+  }
+  paint();
+  stage.scrollTop = 0;
+
+  if (silent) return;
+
+  const step = session.step;
+  const isSegmentStart = step.isFirstPhase;
+  signal(isSegmentStart ? 'segment' : 'phase', isSegmentStart ? [70, 60, 70] : [60]);
+  announce(`${$('#bar-segment').textContent}. ${step.phaseLabel ?? ''}`);
+}
+
+function signal(kind, pattern) {
+  if (!session.state.settings.sound) return;
+  cue.play(kind);
+  cue.buzz(pattern);
+}
+
+function announce(text) {
+  live.textContent = text;
+}
+
+/* ---------- Sheets -------------------------------------------------------- */
+
+function openSheet(title, node) {
+  sheetTitle.textContent = title;
+  sheetBody.replaceChildren(node);
+  sheet.hidden = false;
+  $('#sheet-close').focus();
+}
+
+function closeSheet() {
+  sheet.hidden = true;
+  sheetBody.replaceChildren();
+}
+
+/* ---------- Events -------------------------------------------------------- */
+
+function wireGlobalEvents() {
+  /* --- setup screen --- */
+
+  $('#participant-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = $('#participant-name');
+    if (session.addParticipant(input.value)) {
+      input.value = '';
+      renderParticipants();
+    }
+    input.focus();
+  });
+
+  $('#opt-autoadvance').addEventListener('change', (e) =>
+    session.setSetting('autoAdvance', e.target.checked));
+  $('#opt-sound').addEventListener('change', (e) =>
+    session.setSetting('sound', e.target.checked));
+
+  $('#btn-start').addEventListener('click', () => {
+    /* Starting fresh replaces whatever was stored. */
+    clearStored();
+    $('#resume-note').hidden = true;
+    beginRun({ fresh: true });
+  });
+
+  $('#btn-resume').addEventListener('click', () => {
+    if (!session.restore()) return;
+    if (session.state.status === 'paused') session.resume();
+    syncSettingsInputs();
+    renderParticipants();
+    beginRun({ fresh: false });
+  });
+
+  $('#btn-discard').addEventListener('click', () => {
+    session.reset();
+    $('#resume-note').hidden = true;
+    renderParticipants();
+    syncSettingsInputs();
+  });
+
+  /* --- run screen chrome --- */
+
+  $('#btn-next').addEventListener('click', () => { session.advance(); onStepChange(); });
+  $('#btn-back').addEventListener('click', () => { session.back(); onStepChange(); });
+
+  $('#btn-help').addEventListener('click', () =>
+    openSheet('Troubleshooting', renderTroubleshooting(session)));
+  $('#btn-overview').addEventListener('click', () =>
+    openSheet('Session overview', renderOverview(session)));
+  $('#btn-drift').addEventListener('click', () =>
+    openSheet('Schedule', renderDriftSheet(session)));
+
+  $('#sheet-close').addEventListener('click', closeSheet);
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !sheet.hidden) closeSheet();
+  });
+
+  /* --- delegated actions --- */
+
+  document.addEventListener('click', onDelegatedClick);
+  document.addEventListener('submit', onDelegatedSubmit);
+  document.addEventListener('input', onDelegatedInput);
+
+  /* Last-chance save. `pagehide` fires on iOS where `unload` does not. */
+  window.addEventListener('pagehide', () => session.save());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') session.save();
+  });
+}
+
+function onDelegatedClick(e) {
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const { action } = target.dataset;
+
+  switch (action) {
+    case 'participant-remove':
+      session.removeParticipant(target.dataset.id);
+      renderParticipants();
+      if (!screenRun.hidden) paint();
+      break;
+
+    case 'toggle-variation':
+      ui.variationRevealed = !ui.variationRevealed;
+      paint();
+      break;
+
+    case 'shortlist-remove':
+      session.removeShortlist(target.dataset.id);
+      refreshCapture(target.dataset.participant, target.dataset.slot);
+      break;
+
+    case 'pick':
+      session.setPick(target.dataset.participant, target.dataset.slot, target.dataset.entry);
+      paint();
+      break;
+
+    case 'jump':
+      session.jumpToSegment(Number(target.dataset.segment));
+      closeSheet();
+      onStepChange();
+      break;
+
+    case 'toggle-pause':
+      if (session.state.status === 'paused') session.resume();
+      else session.pause();
+      closeSheet();
+      paint();
+      break;
+
+    case 'reset':
+      session.reset();
+      closeSheet();
+      ticker.stop();
+      wakeLock.disable();
+      lastPaintedStep = -1;
+      renderParticipants();
+      syncSettingsInputs();
+      $('#resume-note').hidden = true;
+      showScreen('setup');
+      break;
+
+    case 'trim-sharing':
+      session.trimSharing(2);
+      closeSheet();
+      announce('Remaining sharing trimmed to two minutes.');
+      paint();
+      break;
+
+    case 'absorb':
+      session.absorbDrift();
+      closeSheet();
+      announce('Overrun absorbed across the remaining shooting time.');
+      paint();
+      break;
+
+    case 'drop':
+      session.dropMission(target.dataset.ref);
+      closeSheet();
+      announce('Mission removed from the session.');
+      onStepChange({ silent: true });
+      break;
+
+    case 'export':
+      exportCollections();
+      break;
+
+    default:
+      break;
+  }
+}
+
+function onDelegatedSubmit(e) {
+  const form = e.target.closest('[data-action="shortlist-add"]');
+  if (!form) return;
+  e.preventDefault();
+
+  const { participant, slot } = form.dataset;
+  if (!session.addShortlist(participant, slot, form.frame.value, form.note.value)) return;
+
+  refreshCapture(participant, slot, { focus: true });
+}
+
+/**
+ * Rebuilds a single participant's capture block in place, leaving every
+ * other block — and anything typed into it — untouched.
+ */
+function refreshCapture(participantId, slotId, { focus = false } = {}) {
+  const p = session.state.participants.find((x) => x.id === participantId);
+  const node = document.querySelector(`[data-capture="${participantId}:${slotId}"]`);
+  if (!p || !node) { paint(); return; }
+
+  const fresh = captureRow(session, p, slotId);
+  node.replaceWith(fresh);
+
+  /* Facilitators usually enter two in a row, so put the caret back. */
+  if (focus) fresh.querySelector('.in-frame')?.focus();
+}
+
+function onDelegatedInput(e) {
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const { action, participant, slot } = target.dataset;
+
+  /* These write straight through without a repaint, so the caret stays put. */
+  if (action === 'collection-title') session.setCollectionField(participant, 'title', target.value);
+  else if (action === 'reflection')  session.setCollectionField(participant, 'reflection', target.value);
+  else if (action === 'image-title') session.setImageTitle(participant, slot, target.value);
+}
+
+async function exportCollections() {
+  const text = collectionsAsText(session);
+  try {
+    await navigator.clipboard.writeText(text);
+    announce('Collections copied to the clipboard.');
+    flashToast('Copied to clipboard');
+  } catch {
+    /* Clipboard blocked (insecure origin, or denied). Show it instead so
+       the text is still recoverable by hand. */
+    openSheet('Collections', el('pre', { class: 'export-text', text }));
+  }
+}
+
+function flashToast(message) {
+  const t = el('p', { class: 'toast', text: message });
+  document.body.append(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+/* ---------- Service worker ------------------------------------------------ */
+
+/**
+ * The offline cache is deliberately NOT registered on plain localhost.
+ *
+ * It serves cache-first, which is exactly right on a walk and exactly
+ * wrong while editing — a stale bundle that survives reload is a very
+ * expensive hour to debug. Append `?sw=1` to test the offline behaviour
+ * locally on purpose.
+ */
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  const forced = new URLSearchParams(location.search).has('sw');
+  const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+  if (!forced && (isLocal || location.protocol !== 'https:')) return;
+  navigator.serviceWorker.register('sw.js').catch(() => {
+    /* Offline support is an enhancement; the app runs without it. */
+  });
+}
+
+boot();

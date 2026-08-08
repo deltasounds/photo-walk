@@ -1,0 +1,14 @@
+{
+  "id": "shutter",
+  "title": "Shutter speed",
+  "basic_theory": "Shutter speed controls how long the camera records light and movement.",
+  "points": [
+    "A fast shutter speed freezes movement.",
+    "A slow shutter speed can show movement as blur.",
+    "Slow shutter speeds can also reveal camera shake."
+  ],
+  "teaching_prompt": "Do you want the movement to look frozen, or do you want us to feel it moving?",
+  "caution": null,
+  "steps": null,
+  "closing": null
+}

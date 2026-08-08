@@ -1,0 +1,41 @@
+{
+  "id": "mission-05",
+  "number": 5,
+  "title": "City Geometry",
+  "creative_focus": "Architecture, repetition, symmetry, lines, and shapes",
+  "technical_connection": "Zoom, perspective, and depth of field",
+  "slot_label": "Architecture",
+  "lead_in": null,
+  "prompt": "Turn part of the city into a pattern or abstract design.",
+  "prompt_options": null,
+  "notice": [
+    "Repeating windows",
+    "Staircases",
+    "Arches",
+    "Triangles and rectangles",
+    "Leading lines",
+    "Reflections",
+    "Frames within frames",
+    "Symmetrical entrances",
+    "Areas of light and shadow"
+  ],
+  "questions": [
+    "Which shapes repeat?",
+    "Where do the lines lead?",
+    "Would the photograph be stronger if it were perfectly symmetrical?",
+    "Can you remove unnecessary surroundings?",
+    "What changes if you photograph from lower down?",
+    "Can a reflection become part of the architecture?"
+  ],
+  "technical_reminder": null,
+  "safety_note": "Remind participants to stop in a safe place before looking upward.",
+  "variation": [
+    {
+      "condition": null,
+      "text": "Make one orderly photograph and one unusual photograph using an extreme crop, reflection, low viewpoint, diagonal, or foreground frame."
+    }
+  ],
+  "review_prompt": "Which photograph turns the building into the strongest arrangement of shapes?",
+  "partner_activity": null,
+  "review_extra": null
+}

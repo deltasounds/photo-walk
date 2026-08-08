@@ -1,0 +1,39 @@
+{
+  "id": "city-photo-walk-v1",
+  "title": "City Photography Workshop",
+  "subtitle": "Two-hour photo walk + 20-minute gallery",
+
+  "_note": "Segments are the session timeline, in order. To add a mission: drop a file in content/missions/ and add one line to `segments`. The collection slots, the schedule, and the shortlist tracking all derive from this array — nothing is hardcoded to six missions or eight images.",
+
+  "rhythms": {
+    "mission-15": [
+      { "id": "intro",   "label": "Introduce the challenge",            "min": 1 },
+      { "id": "shoot",   "label": "Photograph and explore",             "min": 8, "cueAt": 6, "cue": "variation" },
+      { "id": "final",   "label": "One final experiment",               "min": 1 },
+      { "id": "review",  "label": "Review the mission’s photographs",   "min": 2 },
+      { "id": "mark",    "label": "Mark favourites and share",          "min": 2, "capture": true },
+      { "id": "regroup", "label": "Regroup and transition",             "min": 1 }
+    ],
+    "gallery-20": [
+      { "id": "gather",     "label": "Gather the shortlisted photographs", "min": 5 },
+      { "id": "select",     "label": "Make final selections",              "min": 5 },
+      { "id": "sequence",   "label": "Sequence and title",                 "min": 5 },
+      { "id": "exhibition", "label": "Mini exhibition",                    "min": 5 }
+    ]
+  },
+
+  "segments": [
+    { "type": "welcome", "ref": "welcome", "min": 10, "slot": "opening" },
+    { "type": "theory",  "ref": ["aperture", "shutter", "iso", "zoom", "decision-sequence"], "min": 10 },
+
+    { "type": "mission", "ref": "mission-01", "min": 15, "rhythm": "mission-15" },
+    { "type": "mission", "ref": "mission-02", "min": 15, "rhythm": "mission-15" },
+    { "type": "mission", "ref": "mission-03", "min": 15, "rhythm": "mission-15" },
+    { "type": "mission", "ref": "mission-04", "min": 15, "rhythm": "mission-15" },
+    { "type": "mission", "ref": "mission-05", "min": 15, "rhythm": "mission-15" },
+    { "type": "mission", "ref": "mission-06", "min": 15, "rhythm": "mission-15" },
+
+    { "type": "closing", "ref": "closing", "min": 10, "slot": "closing" },
+    { "type": "gallery", "ref": "gallery", "min": 20, "rhythm": "gallery-20" }
+  ]
+}

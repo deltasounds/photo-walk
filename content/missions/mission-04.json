@@ -1,0 +1,37 @@
+{
+  "id": "mission-04",
+  "number": 4,
+  "title": "Color Detective",
+  "creative_focus": "Color relationships and visual simplification",
+  "technical_connection": "Light, ISO, and exposure",
+  "slot_label": "Color",
+  "lead_in": null,
+  "prompt": "Choose one:",
+  "prompt_options": [
+    { "name": "Monochrome", "text": "Use one dominant color or related tones." },
+    { "name": "Color echo", "text": "Repeat the same color in different areas." },
+    { "name": "Color clash", "text": "Combine contrasting colors." },
+    { "name": "Color spotlight", "text": "Isolate one bright color in a neutral scene." }
+  ],
+  "notice": null,
+  "questions": [
+    "Which color did you notice first?",
+    "Is another color distracting from it?",
+    "Can you change position to simplify the edges?",
+    "How does the color affect the mood?",
+    "How does the color change in sunlight and shade?"
+  ],
+  "technical_reminder": [
+    "If the shutter speed becomes too slow in shade, point out how the camera raises ISO, or how the photographer can choose a wider aperture."
+  ],
+  "safety_note": null,
+  "variation": [
+    {
+      "condition": null,
+      "text": "Photograph the same color once in bright light and once in shade."
+    }
+  ],
+  "review_prompt": "Which photograph has the clearest color idea?",
+  "partner_activity": null,
+  "review_extra": null
+}

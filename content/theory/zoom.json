@@ -1,0 +1,14 @@
+{
+  "id": "zoom",
+  "title": "Zoom",
+  "basic_theory": "Zoom changes how much of the scene is included.",
+  "points": [
+    "A wide view shows the subject’s environment.",
+    "A telephoto view isolates details and narrows the frame.",
+    "Zooming changes framing; moving the camera changes perspective and the relationship between objects."
+  ],
+  "teaching_prompt": "Before zooming, ask whether moving your feet would produce a more interesting viewpoint.",
+  "caution": null,
+  "steps": null,
+  "closing": null
+}

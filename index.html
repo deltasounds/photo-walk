@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>City Photo Walk — facilitator</title>
+<meta name="description" content="Facilitator runner for the city photography workshop.">
+<meta name="theme-color" content="#FAF8F5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+
+<!-- Announcements for screen readers. The ticking countdown is hidden
+     from assistive tech; only phase changes are announced, so the app
+     does not read a new number four times a second. -->
+<p id="live" class="sr-only" role="status" aria-live="polite"></p>
+
+<div id="app">
+
+  <!-- ============================ SETUP ============================ -->
+  <section id="screen-setup" class="screen" aria-labelledby="setup-h">
+    <div class="wrap">
+      <p class="eyebrow">Facilitator</p>
+      <h1 id="setup-h" class="t-display" data-bind="session-title">City Photography Workshop</h1>
+      <p class="lede" data-bind="session-subtitle"></p>
+
+      <div class="panel">
+        <h2 class="t-section">Participants</h2>
+        <p class="hint">Names are used to track who has shortlisted a photograph for each mission.</p>
+        <ul id="participant-list" class="chip-list"></ul>
+        <form id="participant-form" class="row-form">
+          <label class="sr-only" for="participant-name">Participant name</label>
+          <input id="participant-name" type="text" autocomplete="off"
+                 placeholder="Add a name" maxlength="24">
+          <button type="submit" class="btn btn-secondary">Add</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2 class="t-section">Before you start</h2>
+        <ul id="setup-checks" class="check-list"></ul>
+      </div>
+
+      <details class="panel panel-quiet">
+        <summary class="t-section">Session plan</summary>
+        <ol id="setup-plan" class="plan-list"></ol>
+      </details>
+
+      <div class="panel panel-quiet">
+        <h2 class="t-section">Options</h2>
+        <label class="switch">
+          <input type="checkbox" id="opt-autoadvance" checked>
+          <span>Advance phases automatically</span>
+        </label>
+        <p class="hint">Phases inside a mission run on their own. Moving to the next
+          mission always waits for you.</p>
+        <label class="switch">
+          <input type="checkbox" id="opt-sound" checked>
+          <span>Sound and vibration at phase changes</span>
+        </label>
+      </div>
+
+      <div id="resume-note" class="notice" hidden>
+        <p><strong>A session is already in progress.</strong></p>
+        <p id="resume-summary" class="hint"></p>
+        <p>
+          <button type="button" class="link" id="btn-resume">Resume it</button> or
+          <button type="button" class="link link-quiet" id="btn-discard">discard it</button>.
+        </p>
+      </div>
+    </div>
+
+    <div class="foot">
+      <button type="button" id="btn-start" class="btn btn-primary btn-block">
+        Start session
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================= RUN ============================= -->
+  <section id="screen-run" class="screen" hidden>
+    <header class="bar">
+      <button type="button" id="btn-overview" class="icon-btn" aria-label="Session overview">
+        <span aria-hidden="true">☰</span>
+      </button>
+      <div class="bar-mid">
+        <p class="bar-seg" id="bar-segment"></p>
+        <p class="bar-phase" id="bar-phase"></p>
+      </div>
+      <button type="button" id="btn-drift" class="chip" data-state="ok">on time</button>
+      <div class="bar-progress"><span id="bar-progress-fill"></span></div>
+    </header>
+
+    <main id="stage" tabindex="-1"></main>
+
+    <footer class="foot foot-run">
+      <button type="button" id="btn-back" class="icon-btn" aria-label="Previous phase">
+        <span aria-hidden="true">◀</span>
+      </button>
+      <button type="button" id="btn-next" class="btn btn-primary btn-grow">Next</button>
+      <button type="button" id="btn-help" class="icon-btn" aria-label="Troubleshooting and prompts">
+        <span aria-hidden="true">?</span>
+      </button>
+    </footer>
+  </section>
+
+</div>
+
+<!-- ============================ SHEET ============================ -->
+<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="sheet-panel">
+    <header class="sheet-head">
+      <h2 id="sheet-title" class="t-section"></h2>
+      <button type="button" id="sheet-close" class="icon-btn" aria-label="Close">
+        <span aria-hidden="true">✕</span>
+      </button>
+    </header>
+    <div id="sheet-body" class="sheet-body"></div>
+  </div>
+</div>
+
+<script type="module" src="scripts/app.js"></script>
+</body>
+</html>

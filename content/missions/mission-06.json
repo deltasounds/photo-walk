@@ -1,0 +1,42 @@
+{
+  "id": "mission-06",
+  "number": 6,
+  "title": "Nature Finds a Way",
+  "creative_focus": "Nature in the built environment and visual storytelling",
+  "technical_connection": "Shutter speed, aperture, and movement",
+  "slot_label": "Nature",
+  "lead_in": null,
+  "prompt": "Show a relationship between nature and the built city.",
+  "prompt_options": null,
+  "notice": [
+    "Plants growing through concrete",
+    "Trees reflected in glass",
+    "Leaf shadows on walls",
+    "Birds interacting with buildings",
+    "Flowers beside roads",
+    "Vines covering architecture",
+    "Natural and manufactured textures"
+  ],
+  "questions": [
+    "What is the relationship between nature and the city?",
+    "Does it feel peaceful, surprising, resilient, or humorous?",
+    "Which subject should be sharp?",
+    "Is anything moving?",
+    "Would freezing or blurring the movement strengthen the story?"
+  ],
+  "technical_reminder": null,
+  "safety_note": null,
+  "variation": [
+    {
+      "condition": "If there is movement",
+      "text": "Photograph it once with a fast shutter speed and once with a slower shutter speed."
+    },
+    {
+      "condition": "If there is no movement",
+      "text": "Try one version with a soft background and one with more of the environment in focus."
+    }
+  ],
+  "review_prompt": "Which photograph tells the strongest story about nature and the city?",
+  "partner_activity": null,
+  "review_extra": "Ask participants to give their shortlisted photograph a possible title."
+}

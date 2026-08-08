@@ -1,0 +1,121 @@
+/* =====================================================================
+   CITY PHOTO WALK — Foundations
+   Facilitator session runner. Read outdoors, at arm's length, one-handed.
+
+   Design intent differs deliberately from the ai-diagnostic system:
+   that tool is calm and editorial for a desk. This one is read while
+   walking, in direct sun, by someone who has about one second to look.
+   Everything here optimises for contrast, size, and thumb reach.
+   ===================================================================== */
+
+:root {
+  /* Light only, on purpose. The dominant context is bright daylight,
+     where a dark UI is markedly harder to read; declaring the scheme
+     stops the browser or OS auto-darkening it on us. */
+  color-scheme: light;
+
+  /* ---------- Type ---------------------------------------------------
+     No webfont. The app must load and run offline from a cold cache on
+     a street corner, and the system grotesque is both instant and
+     highly legible at large sizes. Nothing here needs a font file. */
+  --font-sans: system-ui, -apple-system, "Segoe UI", "Helvetica Neue",
+               Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  /* ---------- Colour · core ------------------------------------------
+     Warm near-white paper, near-black ink. Contrast ratios noted where
+     they matter; every text pairing here clears WCAG AA. */
+  --c-paper:        #FAF8F5;  /* page ground */
+  --c-paper-alt:    #F1ECE4;  /* raised card / secondary surface */
+  --c-paper-sunk:   #E8E1D6;  /* inset wells, progress track */
+  --c-ink:          #16120E;  /* primary text — 16.9:1 on paper */
+  --c-ink-soft:     #4A4239;  /* secondary text — 8.4:1 on paper */
+  --c-ink-faint:    #6E6459;  /* labels, meta — 4.9:1 on paper */
+  --c-rule:         #DCD4C7;  /* hairline */
+  --c-rule-strong:  #C3B9A9;  /* emphasised divider */
+
+  /* Accent: deep orange. Warm and a little playful for a children's
+     workshop, and it holds up in sunlight where mid-tones wash out.
+     5.7:1 on paper — safe for body-size text, not only headings. */
+  --c-accent:       #B4410E;
+  --c-accent-deep:  #8C310A;  /* pressed / border on accent surfaces */
+  --c-accent-tint:  #FBE7D9;  /* accent-tinted panel ground */
+
+  /* Status. Used for drift, coverage gaps, and confirmations. */
+  --c-warn:         #8A5300;  /* running late — 5.4:1 on paper */
+  --c-warn-tint:    #FBEFD8;
+  --c-good:         #2C6B3F;  /* on track / captured — 5.6:1 on paper */
+  --c-good-tint:    #E0EFE4;
+
+  --c-focus:        #0B4FA8;  /* focus ring, distinct from accent */
+
+  /* ---------- Type scale ---------------------------------------------
+     Fluid, biased large. --step-timer is the countdown: it must be
+     readable at arm's length in sun, which is why it dwarfs everything. */
+  --step-timer:  clamp(3.75rem, 19vw, 6.5rem);
+  --step-xl:     clamp(1.875rem, 6.5vw, 2.75rem);   /* mission title */
+  --step-lg:     clamp(1.375rem, 5vw, 1.875rem);    /* prompt to read aloud */
+  --step-md:     clamp(1.125rem, 4vw, 1.3125rem);   /* body, list items */
+  --step-sm:     1rem;                              /* secondary */
+  --step-xs:     0.875rem;                          /* meta, eyebrow */
+
+  --lh-tight:   1.12;
+  --lh-snug:    1.28;
+  --lh-body:    1.5;
+
+  --w-regular:  400;
+  --w-medium:   550;
+  --w-bold:     700;
+  --w-heavy:    800;
+
+  --track-eyebrow: 0.08em;   /* letter-spacing for small caps labels */
+
+  /* ---------- Space ---------------------------------------------------- */
+  --sp-1:  0.25rem;
+  --sp-2:  0.5rem;
+  --sp-3:  0.75rem;
+  --sp-4:  1rem;
+  --sp-5:  1.5rem;
+  --sp-6:  2rem;
+  --sp-7:  3rem;
+  --sp-8:  4rem;
+
+  /* ---------- Layout ---------------------------------------------------- */
+  --measure:      34rem;    /* max content width; keeps lines readable */
+  --gutter:       var(--sp-4);
+  --header-h:     4.25rem;
+  --footer-h:     5.5rem;   /* primary action lives here, thumb-reachable */
+
+  /* ---------- Controls --------------------------------------------------
+     56px minimum. The user is walking, gloved in winter, and not looking
+     carefully. 44px (the bare WCAG floor) is not enough here. */
+  --tap-min:      3.5rem;
+  --tap-min-sm:   2.75rem;  /* secondary icon controls only */
+
+  --radius-sm:    0.375rem;
+  --radius-md:    0.625rem;
+  --radius-lg:    1rem;
+  --radius-pill:  999px;
+
+  --border-hair:  1px;
+  --border-thick: 2px;
+
+  /* ---------- Elevation --------------------------------------------------
+     Restrained: shadows read as mud in sunlight. Borders do the work. */
+  --shadow-card:  0 1px 2px rgb(22 18 14 / 0.06);
+  --shadow-lift:  0 6px 24px rgb(22 18 14 / 0.14);
+
+  /* ---------- Motion ----------------------------------------------------- */
+  --dur-fast:   120ms;
+  --dur-base:   200ms;
+  --dur-slow:   360ms;
+  --ease:       cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "mission-01",
+  "number": 1,
+  "title": "Tiny Subject, Big World",
+  "creative_focus": "Minimalism and negative space",
+  "technical_connection": "Aperture and depth of field",
+  "slot_label": "Minimalism",
+  "lead_in": null,
+  "prompt": "Make a photograph in which most of the frame is empty or visually quiet. Your subject should be small but still attract our attention.",
+  "prompt_options": null,
+  "notice": [
+    "Large walls",
+    "Open pavement",
+    "Sky",
+    "A single window or sign",
+    "A lone person, bicycle, bird, or object",
+    "Simple areas of light or shadow"
+  ],
+  "questions": [
+    "What is the main subject?",
+    "Is anything competing with it?",
+    "Can you simplify the frame by moving?",
+    "How does the empty space make the photograph feel?",
+    "Would a blurry or detailed background help?"
+  ],
+  "technical_reminder": null,
+  "safety_note": null,
+  "variation": [
+    {
+      "condition": null,
+      "text": "Try creating two different moods with the same subject: one calm and one lonely or mysterious."
+    }
+  ],
+  "review_prompt": "Which photograph uses the empty space most intentionally?",
+  "partner_activity": null,
+  "review_extra": null
+}

@@ -1,0 +1,43 @@
+{
+  "id": "mission-02",
+  "number": 2,
+  "title": "Secret Textures",
+  "creative_focus": "Close-up observation and abstraction",
+  "technical_connection": "Focus, aperture, zoom, and minimum focusing distance",
+  "slot_label": "Texture",
+  "lead_in": null,
+  "prompt": "Photograph an ordinary surface so closely that it becomes mysterious or difficult to identify.",
+  "prompt_options": null,
+  "notice": [
+    "Rust",
+    "Bark",
+    "Brick",
+    "Cracked paint",
+    "Stone",
+    "Fabric",
+    "Leaves",
+    "Metal",
+    "Water and reflections"
+  ],
+  "questions": [
+    "Where is the most interesting detail?",
+    "Which part needs to be sharp?",
+    "What happens when light comes from the side?",
+    "Can you fill the frame?",
+    "Would the texture look stronger without its surroundings?"
+  ],
+  "technical_reminder": [
+    "If the camera cannot focus, the photographer may be too close. Move backward slightly and try again.",
+    "Watch for the participant's shadow falling across the subject."
+  ],
+  "safety_note": null,
+  "variation": [
+    {
+      "condition": null,
+      "text": "Combine two contrasting textures, such as rough and smooth, or make an image your partner cannot identify."
+    }
+  ],
+  "review_prompt": "Which photograph makes the texture feel most visible or surprising?",
+  "partner_activity": "Partners can guess what each other photographed.",
+  "review_extra": null
+}

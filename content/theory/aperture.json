@@ -1,0 +1,15 @@
+{
+  "id": "aperture",
+  "title": "Aperture",
+  "basic_theory": "Aperture is the opening inside the lens.",
+  "points": [
+    "A small f-number, such as f/2.8 or f/4, means a wider opening.",
+    "A wide opening allows more light and can produce a blurrier background.",
+    "A larger f-number, such as f/8 or f/11, means a narrower opening.",
+    "A narrow opening allows less light and can keep more of the scene in focus."
+  ],
+  "teaching_prompt": "Do you want one subject to stand out, or do you want the whole scene to feel important?",
+  "caution": "Avoid relying only on the phrases “large aperture” and “small aperture,” which can confuse beginners. Say “wide opening / small f-number” and “narrow opening / large f-number.”",
+  "steps": null,
+  "closing": null
+}

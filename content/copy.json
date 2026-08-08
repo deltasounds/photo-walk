@@ -1,0 +1,116 @@
+{
+  "session_title": "City Photography Workshop",
+
+  "facilitation": {
+    "title": "Facilitation questions",
+    "intro": "Questions that help participants make their own decisions.",
+    "questions": [
+      "What caught your attention?",
+      "What are you trying to show?",
+      "Where does your eye go first?",
+      "What could you leave out?",
+      "Is the background helping?",
+      "What happens if you move closer or lower?",
+      "Should the movement be sharp or blurred?",
+      "Which version communicates your idea most clearly?"
+    ],
+    "reminders": [
+      "Avoid correcting every photograph. Encourage experimentation and comparison.",
+      "Use “favorite,” “most interesting,” or “strongest experiment” rather than “best photograph.”",
+      "Do not ask everyone to present to the full group after every mission. Use pairs or groups of three and rotate partners."
+    ]
+  },
+
+  "time_cues": [
+    "You have about four minutes left.",
+    "One minute left — what haven’t you tried?",
+    "Please mark one or two photographs that you want to revisit later."
+  ],
+
+  "welcome": {
+    "title": "Welcome and camera setup",
+    "goals": [
+      "Welcome the participants.",
+      "Establish safety and group expectations.",
+      "Check the cameras.",
+      "Make an opening photograph before giving instruction."
+    ],
+    "checks": [
+      "Camera straps are being used.",
+      "Batteries and memory cards are ready.",
+      "Everyone knows how to focus and take a photograph.",
+      "Participants understand the physical boundaries of the group."
+    ],
+    "opening_message": "Today is about noticing, experimenting, and having fun. There are no wrong photographs during an experiment. We’ll try different ideas, compare the results, and choose the photographs that interest us most.",
+    "safety": [
+      "Stop walking before looking through the camera.",
+      "Stay within the defined activity area.",
+      "Watch for traffic, cyclists, stairs, and other pedestrians.",
+      "Ask before photographing recognizable people closely.",
+      "Do not enter private property or block sidewalks and entrances."
+    ],
+    "assignment": "Without thinking too much, make one photograph showing how the city feels right now.",
+    "assignment_note": "Do not critique these images. They will become the beginning of each participant’s final collection.",
+    "slot_label": "Opening city photograph"
+  },
+
+  "theory": {
+    "title": "Fast photography fundamentals",
+    "intro": "Keep cameras in participants’ hands. Spend approximately two minutes on each concept."
+  },
+
+  "closing": {
+    "title": "Return and closing photograph",
+    "body": "Allow participants to photograph freely while returning.",
+    "assignment": "Make one photograph showing how the city feels now.",
+    "question": "Ask them to consider whether they notice different things after completing the missions.",
+    "slot_label": "Closing city photograph"
+  },
+
+  "gallery": {
+    "title": "Gallery session",
+    "phases": {
+      "gather": {
+        "title": "Gather the shortlisted photographs",
+        "body": "Transfer or open only the images marked during the walk.",
+        "note": "Each participant should have one or two candidates from every mission.",
+        "items": null
+      },
+      "select": {
+        "title": "Make final selections",
+        "body": "Choose one image for each position in the collection.",
+        "note": null,
+        "items": [
+          "Which image communicates the mission most clearly?",
+          "Where does my eye go first?",
+          "Which image makes me notice or feel something?",
+          "Which image adds something different to my collection?"
+        ]
+      },
+      "sequence": {
+        "title": "Sequence and title",
+        "body": "Participants arrange their photographs and create:",
+        "note": null,
+        "items": [
+          "A title for the collection",
+          "Optional titles for individual images",
+          "A one-sentence reflection beginning: “During the walk, I discovered that…”"
+        ]
+      },
+      "exhibition": {
+        "title": "Mini exhibition",
+        "body": "Display the finished collections. Each participant introduces one photograph.",
+        "note": "Keep the final discussion celebratory and specific. Recognize observation, experimentation, persistence, and creative decisions — not only technical perfection.",
+        "items": [
+          "“This photograph is called ______. I noticed ______, so I tried ______.”"
+        ]
+      }
+    },
+    "reflection_stem": "During the walk, I discovered that…"
+  },
+
+  "done": {
+    "title": "Session complete",
+    "body": "The workshop is successful if participants become more curious and intentional — not if every image is technically perfect."
+  }
+}

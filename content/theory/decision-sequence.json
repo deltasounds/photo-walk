@@ -1,0 +1,15 @@
+{
+  "id": "decision-sequence",
+  "title": "How the controls work together",
+  "basic_theory": "Give participants this decision sequence.",
+  "points": null,
+  "teaching_prompt": null,
+  "caution": null,
+  "steps": [
+    "How much should be in focus?",
+    "Should movement be sharp or blurred?",
+    "Is there enough light?",
+    "Should the photograph show the environment or isolate a detail?"
+  ],
+  "closing": "You don’t need to memorize everything. We’ll practise these ideas when they become useful during the missions."
+}
