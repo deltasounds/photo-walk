@@ -1,7 +1,13 @@
 # City Photo Walk
 
+**Live: https://deltasounds.github.io/photo-walk/**
+
 A facilitator's session runner for a two-hour city photography workshop for
 beginner children, plus a 20-minute gallery session.
+
+Deployed from `main` via GitHub Pages — pushing to `main` redeploys. Because
+the service worker is cache-first, a change lands on the *second* load, not
+the first.
 
 It holds the whole schedule, shows one card of copy at a time, tracks which
 photographs each child has shortlisted, and helps recover when the session
