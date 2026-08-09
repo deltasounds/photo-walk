@@ -343,6 +343,13 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
 }
 .t-block-gap { margin-top: var(--sp-5); }
 
+/* Separates between-session actions from this-session ones. */
+.block-divided {
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-5);
+  border-top: var(--border-hair) solid var(--c-rule);
+}
+
 .pick-list { margin-top: var(--sp-3); }
 .pick { border-top: var(--border-hair) solid var(--c-rule); }
 .pick:first-child { border-top: 0; }

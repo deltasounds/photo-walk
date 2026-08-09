@@ -731,9 +731,14 @@ function resetBlock(session, ui) {
   const { participants, shortlist } = session.state;
 
   if (!ui.confirmingReset) {
-    return el('section', { class: 'block' }, [
+    /* A real button, not a quiet link. This is done before every single
+       workshop — routine, not dangerous — and the two-step confirm below
+       is what carries the risk. Styling it as a footnote made the most
+       frequently needed action the hardest one to find. Divided off,
+       because it belongs to the next session rather than this one. */
+    return el('section', { class: 'block block-divided' }, [
       el('button', {
-        type: 'button', class: 'btn btn-quiet btn-block', 'data-action': 'reset-ask',
+        type: 'button', class: 'btn btn-secondary btn-block', 'data-action': 'reset-ask',
       }, 'Start a new workshop'),
       el('p', { class: 'hint hint-center',
                 text: 'Clears the participants and everything marked. '
