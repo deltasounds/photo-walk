@@ -104,38 +104,11 @@ const section = (title, ...kids) =>
     ...kids,
   ]);
 
-/**
- * The countdown, which is also the pause control.
- *
- * Tapping the clock to stop the clock needs no explaining, and it is by
- * far the largest target on screen — which matters when the reason you
- * are pausing is that something just demanded your attention.
- *
- * The ticking value is hidden from assistive tech; see #live in index.html.
- */
-export function timer(step, session) {
-  const paused = session.state.status === 'paused';
-  return el('button', {
-    type: 'button',
-    class: 'timer',
-    'data-action': 'toggle-pause',
-    'aria-label': paused ? 'Resume the timer' : 'Pause the timer',
-  }, [
-    el('span', { class: 'timer-value', id: 'timer-value', 'aria-hidden': 'true', text: '—' }),
-    el('span', { class: 'timer-label', text: timerLabel(step, paused) }),
-  ]);
-}
-
-/**
- * Single-phase segments have no phase name, which would leave the line
- * blank — so it advertises the tap instead. A pause control nobody
- * knows about is no pause control, and the welcome screen is the first
- * thing the facilitator sees.
- */
-export function timerLabel(step, paused) {
-  if (paused) return 'Paused — tap to resume';
-  return step.phaseLabel ?? 'Tap to pause';
-}
+/* The clock now lives in the header bar (see index.html) rather than in
+   the stage. It was 71px against a 30px line of speech — two and a half
+   times the size of the sentence the facilitator was there to read —
+   and its block cost 116px at the top of every screen. Time is context
+   for the content, not the content. */
 
 /* ---------- Shortlist capture ------------------------------------------ */
 
@@ -379,7 +352,10 @@ function stageMission(session, step, ui) {
        flipping screens mid-flow cost more than it organised. */
     case 'review':
     default:
-      return frag([head,
+      /* No focus/technical line here — that is reference for making the
+         photographs, not for choosing between them, and dropping it
+         lifts the capture form into view without scrolling. */
+      return frag([missionHead(m, { meta: false }),
         sayBlock(m.review_prompt, 'Review prompt'),
         m.review_extra ? noteBlock(m.review_extra, 'quiet') : null,
         captureBlock(session, step.segmentRef, m.slot_label),
@@ -574,18 +550,10 @@ function stageBody(session, step, ui) {
   }
 }
 
-/**
- * The countdown leads every stage. It is the one thing that must be
- * readable without stopping walking, so it sits above the fold on every
- * phase rather than being tucked into the header bar.
- */
+/** The stage is content only; the clock is chrome. */
 export function renderStage(session, ui) {
   if (session.state.status === 'done') return stageDone(session);
-  const step = session.step;
-  return frag([
-    timer(step, session),
-    el('div', { class: 'stage-body' }, [stageBody(session, step, ui)]),
-  ]);
+  return el('div', { class: 'stage-body' }, [stageBody(session, session.step, ui)]);
 }
 
 /* ---------- Sheets --------------------------------------------------------- */
@@ -675,9 +643,9 @@ export function renderOverview(session) {
         ? 'Phases move on by themselves when time runs out. Missions always wait for you.'
         : 'Nothing moves on by itself. A phase that runs over counts up in red until you advance it.' }),
     ]),
-    el('div', { class: 'sheet-actions' }, [
-      el('button', { type: 'button', class: 'btn btn-secondary', 'data-action': 'toggle-pause' },
-        session.state.status === 'paused' ? 'Resume session' : 'Pause session'),
+    el('div', { class: 'sheet-actions sheet-actions-stack' }, [
+      el('button', { type: 'button', class: 'btn btn-secondary', 'data-action': 'schedule' },
+        'Running late? Adjust the schedule'),
       el('button', { type: 'button', class: 'btn btn-quiet', 'data-action': 'reset' },
         'End and reset'),
     ]),

@@ -97,7 +97,13 @@
         <span class="bar-seg" id="bar-segment"></span>
         <span class="bar-phase" id="bar-phase"></span>
       </button>
-      <button type="button" id="btn-drift" class="chip" data-state="ok">on time</button>
+      <!-- The clock lives in the chrome, not the content. It is context
+           for what the facilitator is reading, not the thing she reads. -->
+      <button type="button" id="btn-pause" class="bar-clock" data-state="ok"
+              aria-label="Pause the timer">
+        <span class="bar-time" id="timer-value" aria-hidden="true">—</span>
+        <span class="bar-drift" id="bar-drift">on time</span>
+      </button>
       <div class="bar-progress"><span id="bar-progress-fill"></span></div>
     </header>
 

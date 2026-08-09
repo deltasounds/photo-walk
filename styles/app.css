@@ -133,8 +133,10 @@ button { font: inherit; color: inherit; }
   line-height: var(--lh-tight);
   letter-spacing: -0.015em;
 }
+/* The mission title names the screen; the prompt is what gets spoken.
+   The title therefore sits a step below the prompt, not level with it. */
 .t-title {
-  font-size: var(--step-xl);
+  font-size: var(--step-lg);
   font-weight: var(--w-heavy);
   line-height: var(--lh-tight);
   letter-spacing: -0.015em;
@@ -375,17 +377,44 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   text-overflow: ellipsis;
 }
 
-.chip[data-state] {
+/* The clock, in the chrome. Large enough to read at arm's length, small
+   enough that it never outweighs the sentence being read aloud. Also the
+   pause control — tapping the clock to stop the clock needs no explaining. */
+.bar-clock {
   flex: none;
-  min-height: var(--tap-min-sm);
-  padding: var(--sp-1) var(--sp-3);
-  font-size: var(--step-xs);
-  font-weight: var(--w-bold);
+  display: block;
+  min-width: 4.75rem;
+  min-height: var(--tap-compact);
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--c-paper-alt);
+  border: var(--border-hair) solid var(--c-rule);
+  border-radius: var(--radius-md);
+  text-align: right;
   cursor: pointer;
 }
-.chip[data-state="ok"]    { background: var(--c-paper-alt); border-color: var(--c-rule); color: var(--c-ink-faint); }
-.chip[data-state="late"]  { background: var(--c-warn-tint); border-color: var(--c-warn); color: var(--c-warn); }
-.chip[data-state="ahead"] { background: var(--c-good-tint); border-color: var(--c-good); color: var(--c-good); }
+.bar-time {
+  display: block;
+  font-size: var(--step-clock);
+  font-weight: var(--w-heavy);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.bar-drift {
+  display: block;
+  font-size: var(--step-xs);
+  font-weight: var(--w-bold);
+  color: var(--c-ink-faint);
+}
+.bar-clock[data-state="late"]   { background: var(--c-warn-tint); border-color: var(--c-warn); }
+.bar-clock[data-state="late"] .bar-drift  { color: var(--c-warn); }
+.bar-clock[data-state="ahead"]  { background: var(--c-good-tint); border-color: var(--c-good); }
+.bar-clock[data-state="ahead"] .bar-drift { color: var(--c-good); }
+.bar-clock[data-state="paused"] { background: var(--c-warn); border-color: var(--c-warn); }
+.bar-clock[data-state="paused"] .bar-time,
+.bar-clock[data-state="paused"] .bar-drift { color: var(--c-paper); }
+
+.bar-time.is-over { color: var(--c-warn); }
 
 .bar-progress {
   position: absolute;
@@ -413,50 +442,6 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   max-width: var(--measure);
   margin-inline: auto;
 }
-
-/* The clock doubles as the pause control — a full-width button styled to
-   look like the display it replaced. */
-.timer {
-  display: block;
-  width: 100%;
-  padding: var(--sp-2) var(--sp-3);
-  margin-bottom: var(--sp-4);
-  background: transparent;
-  border: var(--border-thick) solid transparent;
-  border-radius: var(--radius-lg);
-  text-align: center;
-  cursor: pointer;
-}
-.timer:active { background: var(--c-paper-alt); }
-
-.timer-value {
-  display: block;
-  font-size: var(--step-timer);
-  font-weight: var(--w-heavy);
-  line-height: 1;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.timer-value.is-over { color: var(--c-warn); }
-
-.timer-label {
-  display: block;
-  font-size: var(--step-xs);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--track-eyebrow);
-  text-transform: uppercase;
-  color: var(--c-ink-faint);
-  margin-top: var(--sp-1);
-}
-
-/* Paused has to be unmistakable at a glance — a stopped clock that looks
-   like a running one is worse than no clock. */
-.timer[data-paused] {
-  background: var(--c-warn-tint);
-  border-color: var(--c-warn);
-}
-.timer[data-paused] .timer-value,
-.timer[data-paused] .timer-label { color: var(--c-warn); }
 
 .stage-body > * + * { margin-top: var(--sp-5); }
 

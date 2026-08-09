@@ -15,7 +15,7 @@ import { createTicker, createWakeLock, createCue, formatClock, formatDrift } fro
 import { loadContent, createSession, peekStored, clearStored } from './session.js';
 import {
   renderStage, renderTroubleshooting, renderOverview, renderDriftSheet,
-  collectionsAsText, segmentLabel, captureRow, timerLabel, el,
+  collectionsAsText, segmentLabel, captureRow, el,
 } from './render.js';
 
 const $ = (sel) => document.querySelector(sel);
@@ -219,11 +219,12 @@ function updateNumbers(t) {
   }
 
   const drift = session.drift(t);
-  const chip = $('#btn-drift');
-  chip.textContent = formatDrift(drift);
-  chip.dataset.state = drift >= DRIFT_ALERT_MS ? 'late'
-                     : drift <= -DRIFT_ALERT_MS ? 'ahead'
-                     : 'ok';
+  $('#bar-drift').textContent = session.state.status === 'paused'
+    ? 'paused' : formatDrift(drift);
+  $('#btn-pause').dataset.state = session.state.status === 'paused' ? 'paused'
+                                : drift >= DRIFT_ALERT_MS ? 'late'
+                                : drift <= -DRIFT_ALERT_MS ? 'ahead'
+                                : 'ok';
 
   const pct = Math.max(0, Math.min(1, session.elapsed(t) / session.totalMs));
   $('#bar-progress-fill').style.width = `${(pct * 100).toFixed(2)}%`;
@@ -237,15 +238,10 @@ function paint() {
   updateNumbers(Date.now());
 }
 
-/** Updates the clock's paused styling and label without a repaint. */
+/** The clock is persistent chrome, so pausing never needs a repaint. */
 function refreshTimer() {
-  const node = stage.querySelector('.timer');
-  if (!node) return;
   const paused = session.state.status === 'paused';
-  node.toggleAttribute('data-paused', paused);
-  node.setAttribute('aria-label', paused ? 'Resume the timer' : 'Pause the timer');
-  const label = node.querySelector('.timer-label');
-  if (label) label.textContent = timerLabel(session.step, paused);
+  $('#btn-pause').setAttribute('aria-label', paused ? 'Resume the timer' : 'Pause the timer');
   announce(paused ? 'Timer paused.' : 'Timer resumed.');
 }
 
@@ -376,8 +372,12 @@ function wireGlobalEvents() {
   const openOverview = () => openSheet('Jump to', renderOverview(session));
   $('#btn-overview').addEventListener('click', openOverview);
   $('#bar-jump').addEventListener('click', openOverview);
-  $('#btn-drift').addEventListener('click', () =>
-    openSheet('Schedule', renderDriftSheet(session)));
+  $('#btn-pause').addEventListener('click', () => {
+    if (session.state.status === 'paused') session.resume();
+    else session.pause();
+    refreshTimer();
+    updateNumbers(Date.now());
+  });
 
   $('#sheet-close').addEventListener('click', closeSheet);
   sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
@@ -444,14 +444,8 @@ function onDelegatedClick(e) {
       onStepChange();
       break;
 
-    case 'toggle-pause':
-      if (session.state.status === 'paused') session.resume();
-      else session.pause();
-      /* Refresh the clock in place rather than repainting: pausing is
-         often exactly when a half-typed frame number is on screen. */
-      if (!sheet.hidden) closeSheet();
-      refreshTimer();
-      updateNumbers(Date.now());
+    case 'schedule':
+      openSheet('Schedule', renderDriftSheet(session));
       break;
 
     case 'reset':

@@ -52,9 +52,14 @@
   /* ---------- Type scale ---------------------------------------------
      Fluid, biased large. --step-timer is the countdown: it must be
      readable at arm's length in sun, which is why it dwarfs everything. */
-  --step-timer:  clamp(3.75rem, 19vw, 6.5rem);
-  --step-xl:     clamp(1.875rem, 6.5vw, 2.75rem);   /* mission title */
-  --step-lg:     clamp(1.375rem, 5vw, 1.875rem);    /* prompt to read aloud */
+  /* The clock sits in the header. It was 71px in the stage against a 30px
+     line of speech — the loudest thing on screen was the one thing the
+     facilitator never has to read carefully. Now it is legible at arm's
+     length without outranking the words. */
+  --step-clock:  clamp(1.5rem, 6vw, 2rem);
+
+  --step-xl:     clamp(1.875rem, 6.5vw, 2.75rem);   /* the line read aloud */
+  --step-lg:     clamp(1.5rem, 5.2vw, 2rem);        /* titles, review prompts */
   --step-md:     clamp(1.125rem, 4vw, 1.3125rem);   /* body, list items */
   --step-sm:     1rem;                              /* secondary */
   --step-xs:     0.875rem;                          /* meta, eyebrow */
