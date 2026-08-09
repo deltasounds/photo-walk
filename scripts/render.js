@@ -736,7 +736,8 @@ function resetBlock(session, ui) {
         type: 'button', class: 'btn btn-quiet btn-block', 'data-action': 'reset-ask',
       }, 'Start a new workshop'),
       el('p', { class: 'hint hint-center',
-                text: 'Clears the participants and everything marked, ready for a new group.' }),
+                text: 'Clears the participants and everything marked. '
+                    + 'Your chosen missions and settings are kept.' }),
     ]);
   }
 

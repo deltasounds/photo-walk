@@ -283,6 +283,48 @@ export function clearStored(speed = 1) {
   try { localStorage.removeItem(storeKeyFor(speed)); } catch { /* nothing to clear */ }
 }
 
+/* ---------- Preferences ------------------------------------------------- */
+
+/**
+ * How this facilitator runs the workshop, kept apart from any one session.
+ *
+ * The guide's six missions are the plan's defaults, but a given
+ * facilitator has a usual shape — four missions, no fundamentals for a
+ * returning group. Without this, every "start a new workshop" reverts to
+ * the guide and the same two missions get deselected before every single
+ * session. Survives reset on purpose; that is the whole point.
+ */
+const PREFS_KEY = 'photo-walk:preferences:v1';
+
+function readPrefs() {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePrefs(prefs) {
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch { /* private mode */ }
+}
+
+export function clearPrefs() {
+  try { localStorage.removeItem(PREFS_KEY); } catch { /* nothing to clear */ }
+}
+
+/**
+ * The remembered off-list, filtered to segments that still exist — a
+ * mission removed from the plan must not linger in a stale preference
+ * and quietly suppress nothing forever.
+ */
+function rememberedOff(plan) {
+  const prefs = readPrefs();
+  if (!Array.isArray(prefs?.dropped)) return defaultOff(plan);
+  const known = new Set(plan.segments.filter(isOptional).map(segmentId));
+  return prefs.dropped.filter((id) => known.has(id));
+}
+
 /**
  * Looks at a stored session WITHOUT loading it.
  *
@@ -319,8 +361,21 @@ export function peekStored(content, speed = 1) {
 export function createSession(content, { speed = 1 } = {}) {
   const storeKey = storeKeyFor(speed);
   let state = blankState();
-  state.dropped = defaultOff(content.plan);
+  applyPrefs();
   let steps = buildTimeline(content.plan, content, state.dropped, speed);
+
+  /** Seeds a blank session from how this facilitator usually runs it. */
+  function applyPrefs() {
+    state.dropped = rememberedOff(content.plan);
+    const prefs = readPrefs();
+    if (prefs?.settings) Object.assign(state.settings, prefs.settings);
+  }
+
+  /** Records the usual shape. Called on deliberate choices only. */
+  const savePrefs = () => writePrefs({
+    dropped: state.dropped,
+    settings: state.settings,
+  });
   const listeners = new Set();
 
   const notify = () => { for (const fn of listeners) fn(api); };
@@ -409,6 +464,22 @@ export function createSession(content, { speed = 1 } = {}) {
       };
     },
 
+    /** True when the selection still matches the plan's own defaults. */
+    selectionIsDefault() {
+      const a = [...defaultOff(content.plan)].sort().join(',');
+      const b = [...state.dropped].sort().join(',');
+      return a === b;
+    },
+
+    /** Back to the guide's six, discarding the remembered shape. */
+    restoreDefaultSelection() {
+      state.dropped = defaultOff(content.plan);
+      rebuild();
+      state.stepIndex = Math.min(state.stepIndex, steps.length - 1);
+      savePrefs();
+      commit();
+    },
+
     /** Whether an optional non-mission segment (e.g. theory) is included. */
     isSegmentActive(id) { return !state.dropped.includes(id); },
 
@@ -429,6 +500,10 @@ export function createSession(content, { speed = 1 } = {}) {
       else return;
       rebuild();
       state.stepIndex = Math.min(state.stepIndex, steps.length - 1);
+      /* Selection is a preference; dropMission below deliberately is not,
+         since cutting a mission to recover time says nothing about how
+         the next workshop should be shaped. */
+      savePrefs();
       commit();
     },
 
@@ -794,6 +869,7 @@ export function createSession(content, { speed = 1 } = {}) {
 
     setSetting(key, value) {
       state.settings[key] = value;
+      savePrefs();
       commit();
     },
 
@@ -815,9 +891,14 @@ export function createSession(content, { speed = 1 } = {}) {
       return state.status !== 'idle';
     },
 
+    /**
+     * Clears the group, keeps the shape. A new workshop starts with the
+     * missions and settings you last chose, not with the guide's
+     * defaults — participants and photographs go, preferences stay.
+     */
     reset() {
       state = blankState();
-      state.dropped = defaultOff(content.plan);
+      applyPrefs();
       rebuild();
       clearStored(speed);
       notify();

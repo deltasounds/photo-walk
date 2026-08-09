@@ -174,6 +174,10 @@ function renderMissionPicker() {
                   + `+ ${s.missions} × ${s.perMissionMin}m` }),
   );
 
+  /* Only shown once the shape differs from the guide's, so it explains
+     the remembering exactly when the remembering starts to matter. */
+  $('#selection-note').hidden = session.selectionIsDefault();
+
   $('#mission-picker').replaceChildren(...missions.map((m) => {
     const box = el('input', {
       type: 'checkbox', checked: m.active,
@@ -401,6 +405,12 @@ function wireGlobalEvents() {
     session.setSetting('autoAdvance', e.target.checked));
   $('#opt-sound').addEventListener('change', (e) =>
     session.setSetting('sound', e.target.checked));
+  $('#btn-default-missions').addEventListener('click', () => {
+    session.restoreDefaultSelection();
+    renderMissionPicker();
+    buildSetupScreen();
+    syncSettingsInputs();
+  });
   $('#opt-fundamentals').addEventListener('change', (e) => {
     session.setSegmentActive('fundamentals', e.target.checked);
     renderMissionPicker();
