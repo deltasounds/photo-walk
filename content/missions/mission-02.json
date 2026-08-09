@@ -2,6 +2,7 @@
   "id": "mission-02",
   "number": 2,
   "title": "Secret Textures",
+  "short_name": "Macro & Texture",
   "creative_focus": "Close-up observation and abstraction",
   "technical_connection": "Focus, aperture, zoom, and minimum focusing distance",
   "slot_label": "Texture",

@@ -312,7 +312,22 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   background: var(--c-paper);
   border-bottom: var(--border-hair) solid var(--c-rule);
 }
-.bar-mid { flex: 1; min-width: 0; }
+/* The label is a button — see index.html. Styled to read as text, but it
+   is the primary way into the jump list. */
+.bar-mid {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  min-height: var(--tap-min-sm);
+  padding: var(--sp-1) var(--sp-2);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.bar-mid:active { background: var(--c-paper-alt); }
+.bar-seg, .bar-phase { display: block; }
 .bar-seg {
   font-size: var(--step-sm);
   font-weight: var(--w-bold);
@@ -503,11 +518,13 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
 
 /* ---------- Variation disclosure ------------------------------------------ */
 
-.variation {
+.disclosure {
   border: var(--border-hair) solid var(--c-rule-strong);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
+.disclose-body { padding: var(--sp-4); }
+.disclose-body > * + * { margin-top: var(--sp-3); }
 .disclose {
   display: flex;
   align-items: center;
@@ -527,7 +544,6 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   color: var(--c-ink-faint);
 }
 .disclose-mark { font-size: var(--step-md); font-weight: var(--w-heavy); color: var(--c-accent); }
-.variation-body { padding: var(--sp-4); }
 .variation-item + .variation-item { margin-top: var(--sp-4); }
 .variation-cond {
   font-size: var(--step-xs);
@@ -535,6 +551,24 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   color: var(--c-accent);
   margin-bottom: var(--sp-1);
 }
+
+/* The one-minute brief. Framed as a card so it reads as a distinct kind of
+   screen from the working view that follows, not a first draft of it. */
+.brief {
+  padding: var(--sp-4);
+  border: var(--border-thick) solid var(--c-accent);
+  border-radius: var(--radius-lg);
+}
+.brief > * + * { margin-top: var(--sp-4); }
+.brief .say {
+  padding: 0;
+  background: transparent;
+  border-left: 0;
+  border-radius: 0;
+}
+.brief .say-text { font-size: var(--step-xl); line-height: var(--lh-tight); }
+
+.hint-center { text-align: center; }
 
 .nextup {
   padding: var(--sp-4);
@@ -749,6 +783,29 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
 .ov-row-on { background: var(--c-accent-tint); font-weight: var(--w-bold); }
 .ov-label { flex: 1; min-width: 0; font-size: var(--step-sm); }
 .ov-min { flex: none; font-size: var(--step-xs); color: var(--c-ink-faint); }
+
+/* Phases of the segment you are in, so a detour can return to the exact
+   phase rather than replaying the whole rhythm. */
+.ov-phases {
+  padding-left: var(--sp-4);
+  border-left: var(--border-thick) solid var(--c-accent-tint);
+  margin: var(--sp-1) 0 var(--sp-2) var(--sp-3);
+}
+.ov-phase {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--tap-min-sm);
+  padding: var(--sp-1) var(--sp-2);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--c-ink-soft);
+}
+.ov-phase-on { color: var(--c-accent); font-weight: var(--w-bold); }
 .drop-list { margin-top: var(--sp-2); }
 
 .export-text {

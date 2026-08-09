@@ -186,6 +186,7 @@ function blankState() {
     stepIndex: 0,
     stepStartedAt: null,
     pausedAt: null,
+    lastSeenAt: null,
     totalPausedMs: 0,
     stepPausedMs: 0,
     participants: [],
@@ -228,17 +229,28 @@ export function clearStored(speed = 1) {
  * chosen — otherwise typing two names on top of a restored session
  * silently produces four participants and a shortlist from yesterday.
  */
+/** Beyond this gap, a stored session is yesterday's, not a slept phone. */
+export const STALE_AFTER_MS = 6 * 60 * 60 * 1000;
+
 export function peekStored(content, speed = 1) {
   const saved = readStored(storeKeyFor(speed));
   if (!saved || saved.status === 'idle') return null;
 
   const steps = buildTimeline(content.plan, content, saved.dropped ?? [], speed);
   const step = steps[Math.min(saved.stepIndex ?? 0, steps.length - 1)];
+  const idleMs = saved.lastSeenAt ? Date.now() - saved.lastSeenAt : Infinity;
+
   return {
     status: saved.status,
     participants: (saved.participants ?? []).map((p) => p.name),
     marks: (saved.shortlist ?? []).length,
     step,
+    idleMs,
+    /* Live sessions rejoin themselves; anything older, or already
+       finished, goes back through the setup screen so a stale run is
+       never mistaken for the one you are about to lead. */
+    resumable: (saved.status === 'running' || saved.status === 'paused')
+               && idleMs < STALE_AFTER_MS,
   };
 }
 
@@ -252,6 +264,9 @@ export function createSession(content, { speed = 1 } = {}) {
 
   const persist = () => {
     try {
+      /* Stamped on every write so a reload can tell "the phone slept for
+         ten minutes" from "this is last week's session". */
+      state.lastSeenAt = Date.now();
       localStorage.setItem(storeKey, JSON.stringify(state));
     } catch {
       /* Private mode or quota. The session still runs in memory. */
@@ -388,8 +403,13 @@ export function createSession(content, { speed = 1 } = {}) {
     /** Jump to the first step of a segment — the timeline overview. */
     jumpToSegment(segmentIndex) {
       const target = steps.find((s) => s.segmentIndex === segmentIndex);
-      if (!target) return;
-      state.stepIndex = target.index;
+      if (target) api.jumpToStep(target.index);
+    },
+
+    /** Jump to an exact step, including a phase inside the current segment. */
+    jumpToStep(index) {
+      if (index < 0 || index >= steps.length) return;
+      state.stepIndex = index;
       state.stepStartedAt = now();
       state.stepPausedMs = 0;
       if (state.status === 'done') state.status = 'running';

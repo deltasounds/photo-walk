@@ -49,7 +49,7 @@ const wakeLock = createWakeLock();
 const cue      = createCue();
 
 /** Transient view state that is not worth persisting. */
-let ui = { variationRevealed: false };
+let ui = { variationRevealed: false, promptRevealed: false };
 let lastPaintedStep = -1;
 
 /* ---------- Boot --------------------------------------------------------- */
@@ -82,15 +82,30 @@ async function boot() {
   syncSettingsInputs();
   renderParticipants();
 
-  /* Peek only. The stored session is not adopted until "Resume" is
-     pressed, so anything typed on this screen belongs to a fresh run. */
+  wireGlobalEvents();
+
   const stored = peekStored(content, SPEED);
+
+  /* A live session rejoins itself.
+     iOS discards backgrounded tabs and reloads them on return, so a
+     locked phone comes back to a cold start. Asking the facilitator to
+     spot a notice and tap "resume" mid-walk is asking at the worst
+     possible moment — if the session is running and recent, go straight
+     back to where they were. Anything stale or finished still goes
+     through setup, so yesterday's run is never mistaken for today's. */
+  if (stored?.resumable && session.restore()) {
+    syncSettingsInputs();
+    renderParticipants();
+    beginRun({ fresh: false, gesture: false });
+    return;
+  }
+
+  /* Peek only. A stored session is not adopted until "Resume" is
+     pressed, so anything typed on this screen belongs to a fresh run. */
   if (stored) {
     $('#resume-summary').textContent = describeStored(stored);
     $('#resume-note').hidden = false;
   }
-
-  wireGlobalEvents();
 
   ticker = createTicker(tick);
   registerServiceWorker();
@@ -158,10 +173,15 @@ function showScreen(name) {
   screenRun.hidden = name !== 'run';
 }
 
-async function beginRun({ fresh }) {
-  /* The cue's AudioContext must be created inside the tap that starts
-     the session, or mobile browsers block every later sound. */
-  if (session.state.settings.sound) cue.arm();
+async function beginRun({ fresh, gesture = true }) {
+  /* The cue's AudioContext must be created inside a real user gesture or
+     mobile browsers block every later sound. Starting by tapping "Start"
+     qualifies; rejoining automatically after a reload does not, so in
+     that case arm on whatever the facilitator touches next. */
+  if (session.state.settings.sound) {
+    if (gesture) cue.arm();
+    else document.addEventListener('pointerdown', () => cue.arm(), { once: true });
+  }
   if (fresh) session.start();
   await wakeLock.enable();
   showScreen('run');
@@ -264,6 +284,7 @@ function updateChrome() {
 function onStepChange({ silent = false } = {}) {
   if (session.state.stepIndex !== lastPaintedStep) {
     ui.variationRevealed = false;
+    ui.promptRevealed = false;
     lastPaintedStep = session.state.stepIndex;
   }
   paint();
@@ -350,8 +371,9 @@ function wireGlobalEvents() {
 
   $('#btn-help').addEventListener('click', () =>
     openSheet('Troubleshooting', renderTroubleshooting(session)));
-  $('#btn-overview').addEventListener('click', () =>
-    openSheet('Session overview', renderOverview(session)));
+  const openOverview = () => openSheet('Jump to', renderOverview(session));
+  $('#btn-overview').addEventListener('click', openOverview);
+  $('#bar-jump').addEventListener('click', openOverview);
   $('#btn-drift').addEventListener('click', () =>
     openSheet('Schedule', renderDriftSheet(session)));
 
@@ -391,6 +413,11 @@ function onDelegatedClick(e) {
       paint();
       break;
 
+    case 'toggle-prompt':
+      ui.promptRevealed = !ui.promptRevealed;
+      paint();
+      break;
+
     case 'shortlist-remove':
       session.removeShortlist(target.dataset.id);
       refreshCapture(target.dataset.participant, target.dataset.slot);
@@ -403,6 +430,12 @@ function onDelegatedClick(e) {
 
     case 'jump':
       session.jumpToSegment(Number(target.dataset.segment));
+      closeSheet();
+      onStepChange();
+      break;
+
+    case 'jump-step':
+      session.jumpToStep(Number(target.dataset.step));
       closeSheet();
       onStepChange();
       break;
@@ -495,7 +528,7 @@ function onDelegatedInput(e) {
   if (action === 'toggle-autoadvance') {
     session.setSetting('autoAdvance', target.checked);
     $('#opt-autoadvance').checked = target.checked;
-    openSheet('Session overview', renderOverview(session));
+    openSheet('Jump to', renderOverview(session));
     return;
   }
 

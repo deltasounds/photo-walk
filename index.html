@@ -87,13 +87,16 @@
   <!-- ============================= RUN ============================= -->
   <section id="screen-run" class="screen" hidden>
     <header class="bar">
-      <button type="button" id="btn-overview" class="icon-btn" aria-label="Session overview">
+      <button type="button" id="btn-overview" class="icon-btn" aria-label="Jump to another part of the session">
         <span aria-hidden="true">☰</span>
       </button>
-      <div class="bar-mid">
-        <p class="bar-seg" id="bar-segment"></p>
-        <p class="bar-phase" id="bar-phase"></p>
-      </div>
+      <!-- The whole label is the control: tapping where you are to see
+           where else you could go is far easier to find than a glyph. -->
+      <button type="button" class="bar-mid" id="bar-jump"
+              aria-label="Jump to another part of the session">
+        <span class="bar-seg" id="bar-segment"></span>
+        <span class="bar-phase" id="bar-phase"></span>
+      </button>
       <button type="button" id="btn-drift" class="chip" data-state="ok">on time</button>
       <div class="bar-progress"><span id="bar-progress-fill"></span></div>
     </header>

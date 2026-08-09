@@ -2,6 +2,7 @@
   "id": "mission-04",
   "number": 4,
   "title": "Color Detective",
+  "short_name": "Color",
   "creative_focus": "Color relationships and visual simplification",
   "technical_connection": "Light, ISO, and exposure",
   "slot_label": "Color",

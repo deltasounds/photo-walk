@@ -71,7 +71,12 @@ export function segmentLabel(session, step, { short = false } = {}) {
   if (step.segmentType === 'mission') {
     const m = missions[step.segmentRef];
     if (!m) return step.segmentRef;
-    return short ? `Mission ${m.number}` : `Mission ${m.number} · ${m.title}`;
+    /* Navigation names the *subject*, not the playful title. Scanning a
+       list for "Macro & Texture" works; scanning it for "Secret
+       Textures" means decoding six riddles. The evocative title still
+       leads the mission screen — that is the line you say to a child. */
+    const name = m.short_name ?? m.title;
+    return short ? `${m.number}. ${name}` : `Mission ${m.number} · ${name}`;
   }
   if (step.segmentType === 'theory') return copy.theory.title;
   return copy[step.segmentRef]?.title ?? step.segmentRef;
@@ -245,55 +250,59 @@ function stageTheory(session, step) {
 
 /* ---------- Stage: mission --------------------------------------------- */
 
-function missionHead(m) {
-  /* Just the number here. The header bar and the timer label already
-     carry the phase; saying it a third time costs two lines of screen
-     on the one view that most needs to stay glanceable. */
+/**
+ * `meta` carries the creative and technical focus — useful reference
+ * while they photograph, but on the one-minute brief it costs three
+ * lines and pushes the line you are about to read below the fold.
+ */
+function missionHead(m, { meta = true } = {}) {
+  /* Number and subject here; the header bar and timer label carry the
+     phase, so repeating that would cost two lines on the view that most
+     needs to stay glanceable. */
   return frag([
-    eyebrow(`Mission ${m.number}`),
+    eyebrow(`Mission ${m.number} · ${m.short_name ?? ''}`.replace(/ · $/, '')),
     el('h2', { class: 't-title', text: m.title }),
-    el('p', { class: 'meta' }, [
-      el('span', { text: m.creative_focus }),
-      el('span', { class: 'meta-sep', 'aria-hidden': 'true', text: '·' }),
-      el('span', { text: m.technical_connection }),
-    ]),
+    meta
+      ? el('p', { class: 'meta' }, [
+          el('span', { text: m.creative_focus }),
+          el('span', { class: 'meta-sep', 'aria-hidden': 'true', text: '·' }),
+          el('span', { text: m.technical_connection }),
+        ])
+      : null,
   ]);
 }
 
-function promptBlock(m) {
-  return frag([
-    m.lead_in ? noteBlock(m.lead_in, 'quiet') : null,
-    sayBlock(m.prompt, 'Mission prompt'),
-    m.prompt_options
-      ? el('ul', { class: 'options' }, m.prompt_options.map((o) =>
-          el('li', {}, [
-            el('strong', { text: `${o.name}: ` }),
-            el('span', { text: o.text }),
-          ])))
-      : null,
-    m.safety_note ? noteBlock(m.safety_note, 'warn') : null,
+const promptOptions = (m) =>
+  m.prompt_options
+    ? el('ul', { class: 'options' }, m.prompt_options.map((o) =>
+        el('li', {}, [
+          el('strong', { text: `${o.name}: ` }),
+          el('span', { text: o.text }),
+        ])))
+    : null;
+
+/** Collapsible block, shared by the restate-the-prompt and variation panels. */
+function disclosure(label, body, { open, action }) {
+  return el('section', { class: 'block disclosure' }, [
+    el('button', {
+      type: 'button', class: 'disclose', 'data-action': action,
+      'aria-expanded': String(open),
+    }, [
+      el('span', { class: 'disclose-label', text: label }),
+      el('span', { class: 'disclose-mark', 'aria-hidden': 'true', text: open ? '−' : '+' }),
+    ]),
+    el('div', { class: 'disclose-body', hidden: !open }, body),
   ]);
 }
 
 /** Held back until minute six, then revealed by the cue — or on demand. */
 function variationBlock(m, revealed) {
-  const body = el('div', { class: 'variation-body', hidden: !revealed }, [
-    ...m.variation.map((v) => el('div', { class: 'variation-item' }, [
+  return disclosure('Optional variation',
+    m.variation.map((v) => el('div', { class: 'variation-item' }, [
       v.condition ? el('p', { class: 'variation-cond', text: v.condition }) : null,
       el('p', { class: 'say-text say-text-sm', text: v.text }),
     ])),
-  ]);
-
-  return el('section', { class: 'block variation', 'data-role': 'variation' }, [
-    el('button', {
-      type: 'button', class: 'disclose', 'data-action': 'toggle-variation',
-      'aria-expanded': String(revealed),
-    }, [
-      el('span', { class: 'disclose-label', text: 'Optional variation' }),
-      el('span', { class: 'disclose-mark', 'aria-hidden': 'true', text: revealed ? '−' : '+' }),
-    ]),
-    body,
-  ]);
+    { open: revealed, action: 'toggle-variation' });
 }
 
 function stageMission(session, step, ui) {
@@ -304,14 +313,32 @@ function stageMission(session, step, ui) {
   const head = missionHead(m);
 
   switch (step.phaseId) {
+    /* The brief: one thing to read, and nothing else. Previously this
+       carried the prompt AND the notice list, which made it a near-copy
+       of the shoot screen that followed — two screens that look the same
+       read as a bug, not as a rhythm. */
     case 'intro':
-      return frag([head, promptBlock(m),
-        m.notice ? section('Things to notice', bullets(m.notice, 'chips')) : null,
+      return frag([missionHead(m, { meta: false }),
+        el('div', { class: 'brief' }, [
+          /* Prompt first. The lead-in is context for the facilitator and
+             can follow; the sentence they say out loud leads. */
+          sayBlock(m.prompt, 'Read this out'),
+          promptOptions(m),
+          m.lead_in ? noteBlock(m.lead_in, 'quiet') : null,
+          m.safety_note ? noteBlock(m.safety_note, 'warn') : null,
+        ]),
+        el('p', { class: 'hint hint-center',
+                  text: 'Then send them out. The next screen has the things to notice and the questions to ask.' }),
       ]);
 
+    /* The working screen: the tools you use while they photograph. The
+       prompt is here to restate, but collapsed, so it does not crowd out
+       what is actually new. */
     case 'shoot':
       return frag([head,
-        sayBlock(m.prompt, 'Mission prompt'),
+        disclosure('Mission prompt',
+          [sayBlock(m.prompt, 'Read this out'), promptOptions(m)],
+          { open: ui.promptRevealed, action: 'toggle-prompt' }),
         m.notice ? section('Things to notice', bullets(m.notice, 'chips')) : null,
         variationBlock(m, ui.variationRevealed),
         section('Facilitator questions', bullets(m.questions)),
@@ -579,20 +606,38 @@ export function renderOverview(session) {
   for (const s of session.steps) {
     if (seen.has(s.segmentIndex)) continue;
     seen.add(s.segmentIndex);
+    const isCurrent = s.segmentIndex === cur.segmentIndex;
     const label = segmentLabel(session, s);
-    const mins = session.steps
-      .filter((x) => x.segmentIndex === s.segmentIndex)
-      .reduce((a, x) => a + x.realMin, 0);
+    const segSteps = session.steps.filter((x) => x.segmentIndex === s.segmentIndex);
+    const mins = segSteps.reduce((a, x) => a + x.realMin, 0);
 
     rows.push(el('li', {}, [
       el('button', {
         type: 'button',
-        class: `ov-row ${s.segmentIndex === cur.segmentIndex ? 'ov-row-on' : ''}`,
+        class: `ov-row ${isCurrent ? 'ov-row-on' : ''}`,
         'data-action': 'jump', 'data-segment': String(s.segmentIndex),
       }, [
         el('span', { class: 'ov-label', text: label }),
         el('span', { class: 'ov-min', text: `${Math.round(mins)} min` }),
       ]),
+
+      /* The phases of wherever you are, expanded in place. Jumping only
+         to segment starts means the way to reach "mark favourites" after
+         a detour is to sit through the whole rhythm again. */
+      isCurrent && segSteps.length > 1
+        ? el('ol', { class: 'ov-phases' }, segSteps.map((p) =>
+            el('li', {}, [
+              el('button', {
+                type: 'button',
+                class: `ov-phase ${p.index === cur.index ? 'ov-phase-on' : ''}`,
+                'data-action': 'jump-step', 'data-step': String(p.index),
+                'aria-current': p.index === cur.index ? 'step' : null,
+              }, [
+                el('span', { class: 'ov-label', text: p.phaseLabel ?? 'Main' }),
+                el('span', { class: 'ov-min', text: `${p.realMin} min` }),
+              ]),
+            ])))
+        : null,
     ]));
   }
 
