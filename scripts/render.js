@@ -544,7 +544,7 @@ export function renderOverview(session) {
     const label = segmentLabel(session, s);
     const mins = session.steps
       .filter((x) => x.segmentIndex === s.segmentIndex)
-      .reduce((a, x) => a + x.durationMs, 0) / 60000;
+      .reduce((a, x) => a + x.realMin, 0);
 
     rows.push(el('li', {}, [
       el('button', {

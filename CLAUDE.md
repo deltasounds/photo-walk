@@ -81,6 +81,10 @@ they are tidy:
 
 - Greg drives. Propose, wait, then act. Keep steps small and say what you are
   about to do and why.
+- `?fast=N` is rehearsal mode: every duration divided by N, stored under its
+  own localStorage key so a dry run never leaves state the real session would
+  offer to resume, and announced by a standing banner. `step.realMin` keeps
+  the true scheduled length for the plan and overview lists.
 - The service worker is **not** registered on plain localhost — it serves
   cache-first, which is right on a walk and wrong while editing. Use
   `?sw=1` to test offline behaviour on purpose.

@@ -18,6 +18,25 @@ python3 -m http.server 8412
 Then open `http://localhost:8412`. On a phone, add it to the home screen so
 it runs without browser chrome.
 
+## Rehearsing it
+
+The real session is 140 minutes, which is impractical to sit through when you
+just want to check the flow. Add `?fast=N` to divide every duration by N:
+
+| URL | Full session takes |
+|---|---|
+| `?fast=10` | ~14 minutes |
+| `?fast=20` | ~7 minutes |
+| `?fast=60` | ~2 minutes |
+
+Rehearsal runs store their state under a **separate key**, so a dry run can
+never leave a session behind that the real workshop offers to resume. A loud
+banner stays on screen throughout — a compressed run that doesn't announce
+itself is a trap on the morning of the workshop.
+
+Durations are the only thing that changes. The rhythm, the drift arithmetic,
+and the auto-advance rules behave exactly as they will on the day.
+
 ## What it does
 
 - **Runs the clock.** A master session clock plus a phase clock, driven from

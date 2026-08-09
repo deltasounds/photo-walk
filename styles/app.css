@@ -18,7 +18,15 @@ html, body {
   -webkit-text-size-adjust: 100%;
 }
 
-body { overscroll-behavior-y: none; }
+/* Body is the column: an optional banner above, the app filling the rest.
+   Screens size to their parent rather than to the viewport, so adding the
+   rehearsal banner shortens them instead of pushing them off-screen. */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overscroll-behavior-y: none;
+}
 
 h1, h2, h3, p, ul, ol, blockquote, figure { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
@@ -38,12 +46,12 @@ button { font: inherit; color: inherit; }
 
 /* ---------- App frame ---------------------------------------------------- */
 
-#app { height: 100dvh; }
+#app { flex: 1; min-height: 0; }
 
 .screen {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100%;
 }
 .screen[hidden] { display: none; }
 
@@ -724,6 +732,24 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* ---------- Rehearsal banner ----------------------------------------------
+   Deliberately loud and always visible. A compressed dry run that does not
+   announce itself is a trap on the morning of the workshop. */
+
+.rehearsal {
+  flex: none;
+  padding: var(--sp-2) var(--gutter);
+  padding-top: calc(var(--sp-2) + env(safe-area-inset-top, 0px));
+  background: var(--c-warn);
+  color: var(--c-paper);
+  font-size: var(--step-xs);
+  font-weight: var(--w-bold);
+  text-align: center;
+}
+.rehearsal[hidden] { display: none; }
+/* The banner already carries the top inset, so the header must not repeat it. */
+body[data-rehearsal] .bar { padding-top: var(--sp-2); }
 
 /* ---------- Toast --------------------------------------------------------- */
 

@@ -30,6 +30,19 @@ const sheetBody   = $('#sheet-body');
 
 const DRIFT_ALERT_MS = 3 * 60_000;
 
+/**
+ * Rehearsal speed from `?fast=N` — every duration divided by N, so the
+ * full 140-minute session can be walked end to end in a few minutes.
+ *
+ * Clamped rather than trusted, and surfaced as a standing banner: a
+ * compressed run that is not obviously compressed is a trap on the day.
+ */
+const SPEED = (() => {
+  const raw = Number(new URLSearchParams(location.search).get('fast'));
+  if (!Number.isFinite(raw) || raw <= 1) return 1;
+  return Math.min(600, Math.round(raw));
+})();
+
 let session = null;
 let ticker  = null;
 const wakeLock = createWakeLock();
@@ -52,10 +65,18 @@ async function boot() {
     return;
   }
 
-  session = createSession(content);
+  session = createSession(content, { speed: SPEED });
 
   document.querySelector('[data-bind="session-title"]').textContent = content.plan.title;
   document.querySelector('[data-bind="session-subtitle"]').textContent = content.plan.subtitle ?? '';
+
+  if (SPEED > 1) {
+    const total = Math.round(session.totalMs / 60_000);
+    $('#rehearsal').textContent =
+      `Rehearsal — ${SPEED}× speed, whole session in about ${total} min. Not the real thing.`;
+    $('#rehearsal').hidden = false;
+    document.body.dataset.rehearsal = 'true';
+  }
 
   buildSetupScreen();
   syncSettingsInputs();
@@ -63,7 +84,7 @@ async function boot() {
 
   /* Peek only. The stored session is not adopted until "Resume" is
      pressed, so anything typed on this screen belongs to a fresh run. */
-  const stored = peekStored(content);
+  const stored = peekStored(content, SPEED);
   if (stored) {
     $('#resume-summary').textContent = describeStored(stored);
     $('#resume-note').hidden = false;
@@ -92,7 +113,7 @@ function buildSetupScreen() {
     const label = segmentLabel(session, s);
     const mins = session.steps
       .filter((x) => x.segmentIndex === s.segmentIndex)
-      .reduce((a, x) => a + x.durationMs, 0) / 60_000;
+      .reduce((a, x) => a + x.realMin, 0);
     rows.push(el('li', {}, [
       el('span', { class: 'ov-label', text: label }),
       el('span', { class: 'ov-min', text: `${Math.round(mins)} min` }),
@@ -290,7 +311,7 @@ function wireGlobalEvents() {
 
   $('#btn-start').addEventListener('click', () => {
     /* Starting fresh replaces whatever was stored. */
-    clearStored();
+    clearStored(SPEED);
     $('#resume-note').hidden = true;
     beginRun({ fresh: true });
   });

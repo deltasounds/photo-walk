@@ -14,8 +14,17 @@
 
 import { MIN, now } from './clock.js';
 
-const STORE_KEY = 'photo-walk:session:v1';
+const BASE_KEY = 'photo-walk:session:v1';
 const STATE_VERSION = 1;
+
+/**
+ * Rehearsal runs are stored under their own key.
+ *
+ * A compressed dry run must never leave a session behind that the real
+ * workshop then offers to resume — the whole point of rehearsing is to
+ * arrive on the day with the app in a known state.
+ */
+export const storeKeyFor = (speed = 1) => (speed > 1 ? `${BASE_KEY}:rehearsal` : BASE_KEY);
 
 /* ---------- Content loading -------------------------------------------- */
 
@@ -94,10 +103,14 @@ function phasesFor(segment, plan, content) {
  * `dropped` holds mission ids removed mid-session to recover time; they
  * vanish from the timeline and from the collection alike.
  */
-export function buildTimeline(plan, content, dropped = []) {
+export function buildTimeline(plan, content, dropped = [], speed = 1) {
   const steps = [];
   let offset = 0;
   let segmentIndex = 0;
+  /* Rehearsal compresses every duration by the same factor, so the
+     rhythm and the drift arithmetic stay proportionally identical to
+     the real thing — only the wall clock shrinks. */
+  const scale = (min) => Math.max(1000, Math.round((min * MIN) / speed));
 
   for (const segment of plan.segments) {
     if (segment.type === 'mission' && dropped.includes(segment.ref)) continue;
@@ -105,7 +118,7 @@ export function buildTimeline(plan, content, dropped = []) {
     const phases = phasesFor(segment, plan, content);
 
     phases.forEach((phase, i) => {
-      const durationMs = Math.round(phase.min * MIN);
+      const durationMs = scale(phase.min);
       steps.push({
         index: steps.length,
         segmentIndex,
@@ -119,8 +132,12 @@ export function buildTimeline(plan, content, dropped = []) {
         phaseCount: phases.length,
         contentRef: phase.contentRef,
         durationMs,
+        /* The real scheduled length, unaffected by rehearsal speed. The
+           plan and overview lists describe the workshop's shape, so they
+           show this rather than the compressed clock. */
+        realMin: phase.min,
         plannedOffsetMs: offset,
-        cueAtMs: phase.cueAt != null ? Math.round(phase.cueAt * MIN) : null,
+        cueAtMs: phase.cueAt != null ? scale(phase.cueAt) : null,
         cue: phase.cue ?? null,
         capture: Boolean(phase.capture),
         isFirstPhase: i === 0,
@@ -182,9 +199,9 @@ function blankState() {
 
 const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 
-function readStored() {
+function readStored(key) {
   let raw;
-  try { raw = localStorage.getItem(STORE_KEY); } catch { return null; }
+  try { raw = localStorage.getItem(key); } catch { return null; }
   if (!raw) return null;
   try {
     const saved = JSON.parse(raw);
@@ -194,8 +211,8 @@ function readStored() {
   }
 }
 
-export function clearStored() {
-  try { localStorage.removeItem(STORE_KEY); } catch { /* nothing to clear */ }
+export function clearStored(speed = 1) {
+  try { localStorage.removeItem(storeKeyFor(speed)); } catch { /* nothing to clear */ }
 }
 
 /**
@@ -206,11 +223,11 @@ export function clearStored() {
  * chosen — otherwise typing two names on top of a restored session
  * silently produces four participants and a shortlist from yesterday.
  */
-export function peekStored(content) {
-  const saved = readStored();
+export function peekStored(content, speed = 1) {
+  const saved = readStored(storeKeyFor(speed));
   if (!saved || saved.status === 'idle') return null;
 
-  const steps = buildTimeline(content.plan, content, saved.dropped ?? []);
+  const steps = buildTimeline(content.plan, content, saved.dropped ?? [], speed);
   const step = steps[Math.min(saved.stepIndex ?? 0, steps.length - 1)];
   return {
     status: saved.status,
@@ -220,16 +237,17 @@ export function peekStored(content) {
   };
 }
 
-export function createSession(content) {
+export function createSession(content, { speed = 1 } = {}) {
+  const storeKey = storeKeyFor(speed);
   let state = blankState();
-  let steps = buildTimeline(content.plan, content, state.dropped);
+  let steps = buildTimeline(content.plan, content, state.dropped, speed);
   const listeners = new Set();
 
   const notify = () => { for (const fn of listeners) fn(api); };
 
   const persist = () => {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      localStorage.setItem(storeKey, JSON.stringify(state));
     } catch {
       /* Private mode or quota. The session still runs in memory. */
     }
@@ -237,7 +255,7 @@ export function createSession(content) {
 
   const commit = () => { persist(); notify(); };
 
-  const rebuild = () => { steps = buildTimeline(content.plan, content, state.dropped); };
+  const rebuild = () => { steps = buildTimeline(content.plan, content, state.dropped, speed); };
 
   /* ---- time ---------------------------------------------------------- */
 
@@ -433,14 +451,16 @@ export function createSession(content) {
       commit();
     },
 
+    get speed() { return speed; },
+
     /** Trim every remaining sharing phase to `min` minutes. */
     trimSharing(min = 2) {
       const cur = api.step;
+      const target = Math.round((min * MIN) / speed);
       let changed = false;
       for (const s of steps) {
         if (s.index <= cur.index) continue;
         if (s.phaseId !== 'mark') continue;
-        const target = Math.round(min * MIN);
         if (s.durationMs > target) { s.durationMs = target; changed = true; }
       }
       if (changed) { recomputeOffsets(); commit(); }
@@ -455,7 +475,7 @@ export function createSession(content) {
       if (!shoots.length) return;
       /* Never cut a shoot phase below three minutes — past that the
          mission stops being a mission and becomes a walk-past. */
-      const floor = 3 * MIN;
+      const floor = Math.round((3 * MIN) / speed);
       const share = Math.floor(over / shoots.length);
       for (const s of shoots) {
         s.durationMs = Math.max(floor, s.durationMs - share);
@@ -584,7 +604,7 @@ export function createSession(content) {
 
     /** Adopts the stored session. Returns true if one was found. */
     restore() {
-      const saved = readStored();
+      const saved = readStored(storeKey);
       if (!saved) return false;
       state = { ...blankState(), ...saved };
       rebuild();
@@ -596,7 +616,7 @@ export function createSession(content) {
     reset() {
       state = blankState();
       rebuild();
-      clearStored();
+      clearStored(speed);
       notify();
     },
   };
