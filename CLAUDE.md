@@ -54,6 +54,26 @@ Consequences to preserve:
 - Dropping a mission mid-session rebuilds the timeline, so the current
   position is re-found by identity (segment + phase), never by index.
 
+## Screens are beats, not steps
+
+A mission is **three** screens, not six: the brief, the shoot, and
+review-choose-and-share. The rule that got it there is worth keeping.
+
+Give a screen to a **change in what the participants are doing**. Do not
+give a screen to a line the facilitator says while everything else
+carries on — that is a **cue**, and cues surface on the screen already in
+front of them. The four-minute warning, the optional variation, and the
+final-experiment nudge were all screens once; nothing changed for the
+children at any of them.
+
+Equally, do not split one continuous facilitator activity across screens.
+Review, marking and regrouping are one stretch of circulating between
+children; flipping screens mid-flow costs more than it organises.
+
+Cue times are expressed as minutes **remaining**, not elapsed, so they
+stay true when `absorbDrift` shortens a phase. An elapsed-based cue in a
+trimmed phase simply never fires.
+
 ## Field constraints that are not negotiable
 
 These exist because the alternative fails on a street corner, not because

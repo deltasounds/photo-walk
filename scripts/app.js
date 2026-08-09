@@ -49,7 +49,7 @@ const wakeLock = createWakeLock();
 const cue      = createCue();
 
 /** Transient view state that is not worth persisting. */
-let ui = { variationRevealed: false, promptRevealed: false };
+let ui = { variationRevealed: null, promptRevealed: false };
 let lastPaintedStep = -1;
 
 /* ---------- Boot --------------------------------------------------------- */
@@ -200,12 +200,11 @@ function tick(t) {
     return;
   }
 
-  const due = session.dueCue(t);
-  if (due === 'variation') {
-    ui.variationRevealed = true;
+  const due = session.dueCues(t);
+  if (due.length) {
     paint();
     signal('nudge', [40]);
-    announce('Optional variation available.');
+    announce(due.map((c) => c.text ?? 'Optional variation available.').join(' '));
   }
 
   updateNumbers(t);
@@ -272,10 +271,13 @@ function updateChrome() {
   if (session.isLastStep) {
     next.textContent = 'Finish';
   } else if (step.isLastPhase) {
+    /* No "Start" prefix — it is the primary forward button, so the verb
+       is understood, and the words saved keep the longest mission names
+       on one line. */
     const upcoming = session.steps.find((s) => s.segmentIndex === step.segmentIndex + 1);
-    next.textContent = `Start ${segmentLabel(session, upcoming, { short: true })} →`;
+    next.textContent = `${segmentLabel(session, upcoming, { short: true })} →`;
   } else {
-    next.textContent = 'Next phase →';
+    next.textContent = 'Next →';
   }
 
   $('#btn-back').disabled = session.state.stepIndex === 0;
@@ -283,7 +285,7 @@ function updateChrome() {
 
 function onStepChange({ silent = false } = {}) {
   if (session.state.stepIndex !== lastPaintedStep) {
-    ui.variationRevealed = false;
+    ui.variationRevealed = null;   // null = follow the cue
     ui.promptRevealed = false;
     lastPaintedStep = session.state.stepIndex;
   }
@@ -408,13 +410,15 @@ function onDelegatedClick(e) {
       if (!screenRun.hidden) paint();
       break;
 
+    /* Flip from what is actually rendered, since the variation panel may
+       be open because its cue fired rather than because a flag was set. */
     case 'toggle-variation':
-      ui.variationRevealed = !ui.variationRevealed;
+      ui.variationRevealed = target.getAttribute('aria-expanded') !== 'true';
       paint();
       break;
 
     case 'toggle-prompt':
-      ui.promptRevealed = !ui.promptRevealed;
+      ui.promptRevealed = target.getAttribute('aria-expanded') !== 'true';
       paint();
       break;
 

@@ -79,6 +79,13 @@ schedule sheet.)
 **To change the mission rhythm:** edit `rhythms.mission-15`. All six missions
 share it. A different-length mission is a new rhythm entry.
 
+Each mission is three screens — the brief, the shoot, and
+review-choose-and-share. Beats that are only a line to say while everything
+else continues (the four-minute warning, the optional variation, the
+final-experiment nudge) are `cues` on the shoot phase instead of screens of
+their own. Cue times are minutes **remaining**, so they stay true even when
+a phase is shortened to recover the schedule.
+
 **To add a theory card:** drop a file in `content/theory/`, add its id to the
 theory segment's `ref` array. The ten minutes redistribute automatically.
 

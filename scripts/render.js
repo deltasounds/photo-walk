@@ -78,8 +78,11 @@ export function segmentLabel(session, step, { short = false } = {}) {
     const name = m.short_name ?? m.title;
     return short ? `${m.number}. ${name}` : `Mission ${m.number} · ${name}`;
   }
-  if (step.segmentType === 'theory') return copy.theory.title;
-  return copy[step.segmentRef]?.title ?? step.segmentRef;
+  const c = step.segmentType === 'theory' ? copy.theory : copy[step.segmentRef];
+  if (!c) return step.segmentRef;
+  /* Short titles keep the header bar and the forward button on one line
+     without truncating; the full title still heads the screen itself. */
+  return (short && c.short_title) ? c.short_title : c.title;
 }
 
 const bullets = (items, cls = 'bullets') =>
@@ -305,6 +308,23 @@ function variationBlock(m, revealed) {
     { open: revealed, action: 'toggle-variation' });
 }
 
+/**
+ * Cues already delivered, kept on screen rather than flashed.
+ *
+ * The facilitator is usually looking at a child when one fires, so a
+ * transient message is a message missed. They stack in the order they
+ * came due, which also reads as a rough sense of how far through you are.
+ */
+function cueRail(cues) {
+  const said = cues.filter((c) => c.type === 'say');
+  if (!said.length) return null;
+  return el('section', { class: 'block cues' }, said.map((c) =>
+    el('p', { class: 'cue' }, [
+      el('span', { class: 'cue-mark', 'aria-hidden': 'true', text: '▸' }),
+      el('span', { text: c.text }),
+    ])));
+}
+
 function stageMission(session, step, ui) {
   const m = session.content.missions[step.contentRef];
   if (!m) return el('p', { class: 'hint', text: `Missing mission: ${step.contentRef}` });
@@ -317,7 +337,7 @@ function stageMission(session, step, ui) {
        carried the prompt AND the notice list, which made it a near-copy
        of the shoot screen that followed — two screens that look the same
        read as a bug, not as a rhythm. */
-    case 'intro':
+    case 'brief':
       return frag([missionHead(m, { meta: false }),
         el('div', { class: 'brief' }, [
           /* Prompt first. The lead-in is context for the facilitator and
@@ -334,55 +354,51 @@ function stageMission(session, step, ui) {
     /* The working screen: the tools you use while they photograph. The
        prompt is here to restate, but collapsed, so it does not crowd out
        what is actually new. */
-    case 'shoot':
+    case 'shoot': {
+      const cues = session.firedCues();
+      /* null means "follow the cue"; an explicit toggle wins after that,
+         and the fired state survives a reload where a UI flag would not. */
+      const variationOpen = ui.variationRevealed
+        ?? cues.some((c) => c.type === 'show' && c.panel === 'variation');
+
       return frag([head,
+        cueRail(cues),
         disclosure('Mission prompt',
           [sayBlock(m.prompt, 'Read this out'), promptOptions(m)],
           { open: ui.promptRevealed, action: 'toggle-prompt' }),
         m.notice ? section('Things to notice', bullets(m.notice, 'chips')) : null,
-        variationBlock(m, ui.variationRevealed),
+        variationBlock(m, variationOpen),
         section('Facilitator questions', bullets(m.questions)),
         m.technical_reminder ? section('Technical reminder', bullets(m.technical_reminder)) : null,
       ]);
+    }
 
-    case 'final':
-      return frag([head,
-        sayBlock('One minute left — what haven’t you tried?', 'Time cue'),
-        section('Facilitator questions', bullets(m.questions)),
-      ]);
-
+    /* Review, mark and regroup were three screens for one continuous
+       activity: look at what you made, choose, show a partner, move on.
+       The facilitator is circulating between children throughout, so
+       flipping screens mid-flow cost more than it organised. */
     case 'review':
+    default:
       return frag([head,
         sayBlock(m.review_prompt, 'Review prompt'),
         m.review_extra ? noteBlock(m.review_extra, 'quiet') : null,
-        section('Questions that help them decide', bullets(copy.facilitation.questions)),
-      ]);
-
-    case 'mark':
-      return frag([head,
-        sayBlock(copy.time_cues[2], 'Time cue'),
-        m.partner_activity ? noteBlock(m.partner_activity, 'quiet') : null,
         captureBlock(session, step.segmentRef, m.slot_label),
-        noteBlock(copy.facilitation.reminders[2], 'quiet'),
-      ]);
-
-    case 'regroup':
-    default:
-      return frag([head,
-        el('p', { class: 'lede', text: 'Regroup, rotate partners, and move to the next location.' }),
-        nextUp(session, step),
+        section('Then share',
+          noteBlock(m.partner_activity ?? copy.facilitation.reminders[2], 'quiet')),
+        el('div', { class: 'nextup' }, [
+          el('p', { class: 'eyebrow', text: 'Before moving on' }),
+          el('p', { class: 'nextup-title', text: 'Rotate partners.' }),
+          nextUpLine(session, step),
+        ]),
       ]);
   }
 }
 
 /** A short look ahead, so transitions do not need the overview screen. */
-function nextUp(session, step) {
+function nextUpLine(session, step) {
   const next = session.steps.find((s) => s.segmentIndex === step.segmentIndex + 1);
   if (!next) return null;
-  return el('div', { class: 'nextup' }, [
-    el('p', { class: 'eyebrow', text: 'Next' }),
-    el('p', { class: 'nextup-title', text: segmentLabel(session, next) }),
-  ]);
+  return el('p', { class: 'nextup-next', text: `Next: ${segmentLabel(session, next)}` });
 }
 
 /* ---------- Stage: closing --------------------------------------------- */

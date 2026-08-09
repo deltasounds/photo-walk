@@ -90,6 +90,11 @@
      56px minimum. The user is walking, gloved in winter, and not looking
      carefully. 44px (the bare WCAG floor) is not enough here. */
   --tap-min:      3.5rem;
+  --tap-compact:  3rem;     /* persistent chrome — 48px, still well clear
+                               of the 44px floor, but the action bar is on
+                               screen the entire session and every pixel it
+                               takes is a pixel of prompt the facilitator
+                               cannot read */
   --tap-min-sm:   2.75rem;  /* secondary icon controls only */
 
   --radius-sm:    0.375rem;

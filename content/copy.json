@@ -29,6 +29,7 @@
 
   "welcome": {
     "title": "Welcome and camera setup",
+    "short_title": "Welcome",
     "goals": [
       "Welcome the participants.",
       "Establish safety and group expectations.",
@@ -56,11 +57,13 @@
 
   "theory": {
     "title": "Fast photography fundamentals",
+    "short_title": "Fundamentals",
     "intro": "Keep cameras in participants’ hands. Spend approximately two minutes on each concept."
   },
 
   "closing": {
     "title": "Return and closing photograph",
+    "short_title": "Closing photo",
     "body": "Allow participants to photograph freely while returning.",
     "assignment": "Make one photograph showing how the city feels now.",
     "question": "Ask them to consider whether they notice different things after completing the missions.",
@@ -69,6 +72,7 @@
 
   "gallery": {
     "title": "Gallery session",
+    "short_title": "Gallery",
     "phases": {
       "gather": {
         "title": "Gather the shortlisted photographs",

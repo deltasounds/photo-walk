@@ -15,7 +15,10 @@
 import { MIN, now } from './clock.js';
 
 const BASE_KEY = 'photo-walk:session:v1';
-const STATE_VERSION = 1;
+/* Bumped when the shape of a stored session stops matching the current
+   plan. v2 reshaped the mission rhythm from six phases to three, so a v1
+   session's step index points somewhere meaningless. */
+const STATE_VERSION = 2;
 
 /**
  * Rehearsal runs are stored under their own key.
@@ -137,8 +140,16 @@ export function buildTimeline(plan, content, dropped = [], speed = 1) {
            show this rather than the compressed clock. */
         realMin: phase.min,
         plannedOffsetMs: offset,
-        cueAtMs: phase.cueAt != null ? scale(phase.cueAt) : null,
-        cue: phase.cue ?? null,
+        /* Cues are keyed on time REMAINING, not elapsed, so "one minute
+           left" stays true even after absorbDrift shortens the phase —
+           an elapsed-based cue in a trimmed phase simply never fires. */
+        cues: (phase.cues ?? []).map((c, ci) => ({
+          index: ci,
+          remainingMs: scale(c.remaining),
+          type: c.type,
+          text: c.text ?? null,
+          panel: c.panel ?? null,
+        })),
         capture: Boolean(phase.capture),
         isFirstPhase: i === 0,
         isLastPhase: i === phases.length - 1,
@@ -355,16 +366,31 @@ export function createSession(content, { speed = 1 } = {}) {
       return api.stepRemaining(t) <= 0;
     },
 
-    /** Cue fired at most once per step. Returns the cue name or null. */
-    dueCue(t = now()) {
+    /**
+     * Cues that have just come due. Each fires once and is remembered,
+     * so a cue delivered before the phone slept is still on screen when
+     * it wakes rather than silently lost.
+     */
+    dueCues(t = now()) {
       const s = api.step;
-      if (!s.cueAtMs || state.status !== 'running') return null;
-      const key = `${s.index}:${s.cue}`;
-      if (state.firedCues.includes(key)) return null;
-      if (api.stepElapsed(t) < s.cueAtMs) return null;
-      state.firedCues.push(key);
-      persist();
-      return s.cue;
+      if (state.status !== 'running' || !s.cues.length) return [];
+      const remaining = api.stepRemaining(t);
+      const fired = [];
+      for (const c of s.cues) {
+        const key = `${s.index}:${c.index}`;
+        if (state.firedCues.includes(key)) continue;
+        if (remaining > c.remainingMs) continue;
+        state.firedCues.push(key);
+        fired.push(c);
+      }
+      if (fired.length) persist();
+      return fired;
+    },
+
+    /** Every cue already delivered for the current step, in order. */
+    firedCues() {
+      const s = api.step;
+      return s.cues.filter((c) => state.firedCues.includes(`${s.index}:${c.index}`));
     },
 
     /* ---- transitions ---- */

@@ -6,16 +6,25 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html, body {
+/* The root font-size stays at the browser default on purpose.
+   Setting it to --step-md rescaled every rem token with it: --tap-min
+   meant 56px but rendered 63px, and --step-sm (1rem) collapsed onto
+   --step-md. Body text size belongs on body; rem stays a stable unit
+   that means what the tokens say, and still honours a user's own
+   browser font-size preference. */
+html {
   margin: 0;
   height: 100%;
+  -webkit-text-size-adjust: 100%;  /* stop iOS inflating text in landscape */
+}
+
+body {
+  margin: 0;
   background: var(--c-paper);
   color: var(--c-ink);
   font-family: var(--font-sans);
   font-size: var(--step-md);
   line-height: var(--lh-body);
-  /* Stop iOS inflating text in landscape, which breaks the timer size. */
-  -webkit-text-size-adjust: 100%;
 }
 
 /* Body is the column: an optional banner above, the app filling the rest.
@@ -78,10 +87,33 @@ button { font: inherit; color: inherit; }
   max-width: var(--measure);
   margin-inline: auto;
 }
+/* The action bar is on screen for the whole session, so it is tuned to be
+   compact rather than generous: 48px controls, one line of smaller text,
+   and a label that truncates rather than wrapping. A two-line button cost
+   about 28px of prompt on every screen. */
 .foot-run {
   display: flex;
   gap: var(--sp-2);
   align-items: center;
+  padding-top: var(--sp-2);
+  padding-bottom: calc(var(--sp-2) + env(safe-area-inset-bottom, 0px));
+}
+.foot-run .icon-btn {
+  width: var(--tap-compact);
+  height: var(--tap-compact);
+}
+.foot-run .btn {
+  min-height: var(--tap-compact);
+  padding: 0 var(--sp-3);
+  font-size: var(--step-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Block, not flex: an anonymous flex item will not ellipsis reliably.
+     Line-height centres the label, minus the borders so the total lands
+     exactly on the target height rather than overshooting by 4px. */
+  display: block;
+  line-height: calc(var(--tap-compact) - 2 * var(--border-thick));
 }
 
 /* ---------- Type --------------------------------------------------------- */
@@ -576,6 +608,25 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   border-radius: var(--radius-md);
 }
 .nextup-title { font-size: var(--step-md); font-weight: var(--w-bold); }
+.nextup-next {
+  margin-top: var(--sp-2);
+  font-size: var(--step-sm);
+  color: var(--c-ink-faint);
+}
+
+/* Cues delivered so far. They accumulate as the phase runs down, so they
+   are styled as a quiet record rather than an alert each time. */
+.cues > * + * { margin-top: var(--sp-2); }
+.cue {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--c-accent-tint);
+  border-radius: var(--radius-md);
+  font-size: var(--step-md);
+  font-weight: var(--w-medium);
+}
+.cue-mark { flex: none; color: var(--c-accent); font-weight: var(--w-heavy); }
 
 /* ---------- Capture ------------------------------------------------------- */
 

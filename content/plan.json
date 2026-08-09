@@ -6,13 +6,16 @@
   "_note": "Segments are the session timeline, in order. To add a mission: drop a file in content/missions/ and add one line to `segments`. The collection slots, the schedule, and the shortlist tracking all derive from this array — nothing is hardcoded to six missions or eight images.",
 
   "rhythms": {
+    "_rhythm_note": "Three screens, not six. The beats that were only a line to say — the four-minute warning, the optional variation, the final-experiment nudge — are cues that surface on the shoot screen as time runs down, because they change nothing about what the participants are doing. Review, marking and regrouping are one continuous activity for the facilitator, who is circulating between children throughout. Cue times are given as minutes REMAINING so they stay true if a phase is shortened to recover the schedule.",
+
     "mission-15": [
-      { "id": "intro",   "label": "Introduce the challenge",            "min": 1 },
-      { "id": "shoot",   "label": "Photograph and explore",             "min": 8, "cueAt": 6, "cue": "variation" },
-      { "id": "final",   "label": "One final experiment",               "min": 1 },
-      { "id": "review",  "label": "Review the mission’s photographs",   "min": 2 },
-      { "id": "mark",    "label": "Mark favourites and share",          "min": 2, "capture": true },
-      { "id": "regroup", "label": "Regroup and transition",             "min": 1 }
+      { "id": "brief",  "label": "The mission",              "min": 1 },
+      { "id": "shoot",  "label": "Photograph and explore",   "min": 9, "cues": [
+          { "remaining": 4, "type": "say",  "text": "You have about four minutes left." },
+          { "remaining": 3, "type": "show", "panel": "variation" },
+          { "remaining": 1, "type": "say",  "text": "One minute left — what haven’t you tried?" }
+        ] },
+      { "id": "review", "label": "Review, choose and share", "min": 5, "capture": true }
     ],
     "gallery-20": [
       { "id": "gather",     "label": "Gather the shortlisted photographs", "min": 5 },
