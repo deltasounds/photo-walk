@@ -84,6 +84,12 @@ async function boot() {
 
   wireGlobalEvents();
 
+  /* Before the resume check below: that path calls beginRun and returns,
+     so a ticker created after it would never exist — the clock would
+     paint once on rejoin and then sit frozen. */
+  ticker = createTicker(tick);
+  registerServiceWorker();
+
   const stored = peekStored(content, SPEED);
 
   /* A live session rejoins itself.
@@ -106,9 +112,6 @@ async function boot() {
     $('#resume-summary').textContent = describeStored(stored);
     $('#resume-note').hidden = false;
   }
-
-  ticker = createTicker(tick);
-  registerServiceWorker();
 }
 
 /* ---------- Setup screen -------------------------------------------------- */
@@ -355,12 +358,7 @@ function wireGlobalEvents() {
     beginRun({ fresh: false });
   });
 
-  $('#btn-discard').addEventListener('click', () => {
-    session.reset();
-    $('#resume-note').hidden = true;
-    renderParticipants();
-    syncSettingsInputs();
-  });
+  $('#btn-discard').addEventListener('click', startFresh);
 
   /* --- run screen chrome --- */
 
@@ -369,7 +367,7 @@ function wireGlobalEvents() {
 
   $('#btn-help').addEventListener('click', () =>
     openSheet('Troubleshooting', renderTroubleshooting(session)));
-  const openOverview = () => openSheet('Jump to', renderOverview(session));
+  const openOverview = () => openSheet('Session', renderOverview(session, ui));
   $('#btn-overview').addEventListener('click', openOverview);
   $('#bar-jump').addEventListener('click', openOverview);
   $('#btn-pause').addEventListener('click', () => {
@@ -398,6 +396,27 @@ function wireGlobalEvents() {
   });
 }
 
+/**
+ * Wipes the session and returns to setup, ready for a different group.
+ * Also the path the setup screen's "start fresh" takes, so there is one
+ * teardown rather than two that can drift apart.
+ */
+function startFresh() {
+  session.reset();
+  clearStored(SPEED);
+  closeSheet();
+  ticker.stop();
+  wakeLock.disable();
+  lastPaintedStep = -1;
+  ui = { variationRevealed: null, promptRevealed: false,
+         galleryParticipant: null, confirmingReset: false };
+  renderParticipants();
+  syncSettingsInputs();
+  $('#resume-note').hidden = true;
+  showScreen('setup');
+  announce('Session cleared. Ready for a new group.');
+}
+
 function onDelegatedClick(e) {
   const target = e.target.closest('[data-action]');
   if (!target) return;
@@ -407,6 +426,7 @@ function onDelegatedClick(e) {
     case 'participant-remove':
       session.removeParticipant(target.dataset.id);
       renderParticipants();
+      if (!sheet.hidden) openSheet('Session', renderOverview(session, ui));
       if (!screenRun.hidden) paint();
       break;
 
@@ -455,16 +475,18 @@ function onDelegatedClick(e) {
       paint();
       break;
 
-    case 'reset':
-      session.reset();
-      closeSheet();
-      ticker.stop();
-      wakeLock.disable();
-      lastPaintedStep = -1;
-      renderParticipants();
-      syncSettingsInputs();
-      $('#resume-note').hidden = true;
-      showScreen('setup');
+    case 'reset-ask':
+      ui.confirmingReset = true;
+      openSheet('Session', renderOverview(session, ui));
+      break;
+
+    case 'reset-cancel':
+      ui.confirmingReset = false;
+      openSheet('Session', renderOverview(session, ui));
+      break;
+
+    case 'reset-confirm':
+      startFresh();
       break;
 
     case 'trim-sharing':
@@ -498,6 +520,21 @@ function onDelegatedClick(e) {
 }
 
 function onDelegatedSubmit(e) {
+  const roster = e.target.closest('[data-action="participant-add"]');
+  if (roster) {
+    e.preventDefault();
+    /* Mid-session additions start from the slot in progress; at setup
+       there is no current step, so they count from the beginning. */
+    const fromSlotId = screenRun.hidden ? null : session.currentSlotId();
+    if (session.addParticipant(roster.name.value, { fromSlotId })) {
+      roster.name.value = '';
+      renderParticipants();
+      if (!sheet.hidden) openSheet('Session', renderOverview(session, ui));
+      if (!screenRun.hidden) paint();
+    }
+    return;
+  }
+
   const form = e.target.closest('[data-action="shortlist-add"]');
   if (!form) return;
   e.preventDefault();
@@ -533,7 +570,7 @@ function onDelegatedInput(e) {
   if (action === 'toggle-autoadvance') {
     session.setSetting('autoAdvance', target.checked);
     $('#opt-autoadvance').checked = target.checked;
-    openSheet('Jump to', renderOverview(session));
+    openSheet('Session', renderOverview(session, ui));
     return;
   }
 

@@ -685,7 +685,76 @@ export function renderTroubleshooting(session) {
   ]);
 }
 
-export function renderOverview(session) {
+/**
+ * Roster management, mid-session.
+ *
+ * A child arriving late, or a name typed wrong, previously meant
+ * resetting the whole session — which throws away every frame number
+ * recorded so far.
+ */
+function participantsBlock(session) {
+  const { participants } = session.state;
+
+  return el('section', { class: 'block' }, [
+    el('h3', { class: 't-block', text: 'Participants' }),
+    participants.length
+      ? el('ul', { class: 'chip-list' }, participants.map((p) =>
+          el('li', { class: 'chip chip-person' }, [
+            el('span', { text: p.name }),
+            el('button', {
+              type: 'button', class: 'chip-x', 'aria-label': `Remove ${p.name}`,
+              'data-action': 'participant-remove', 'data-id': p.id,
+            }, el('span', { 'aria-hidden': 'true', text: '✕' })),
+          ])))
+      : el('p', { class: 'hint', text: 'No participants yet.' }),
+    el('form', { class: 'row-form', 'data-action': 'participant-add' }, [
+      el('input', {
+        type: 'text', name: 'name', placeholder: 'Add someone', maxLength: 24,
+        autocomplete: 'off', 'aria-label': 'New participant name',
+      }),
+      el('button', { type: 'submit', class: 'btn btn-secondary btn-sm', text: 'Add' }),
+    ]),
+    el('p', { class: 'hint',
+              text: 'Someone added now is only expected to have photographs from here on.' }),
+  ]);
+}
+
+/**
+ * Clearing the session out for a new group.
+ *
+ * Named for what she wants to do rather than what it does internally,
+ * and confirmed in two steps: this throws away every frame number
+ * recorded on the walk, which is the one thing in here that cannot be
+ * reconstructed from the cameras afterwards.
+ */
+function resetBlock(session, ui) {
+  const { participants, shortlist } = session.state;
+
+  if (!ui.confirmingReset) {
+    return el('section', { class: 'block' }, [
+      el('button', {
+        type: 'button', class: 'btn btn-quiet btn-block', 'data-action': 'reset-ask',
+      }, 'Start a new workshop'),
+      el('p', { class: 'hint hint-center',
+                text: 'Clears the participants and everything marked, ready for a new group.' }),
+    ]);
+  }
+
+  const marked = shortlist.length;
+  return el('section', { class: 'block' }, [
+    el('p', { class: 'note note-warn',
+              text: `This clears ${participants.length} participant${participants.length === 1 ? '' : 's'} `
+                  + `and ${marked} marked photograph${marked === 1 ? '' : 's'}. It cannot be undone.` }),
+    el('div', { class: 'sheet-actions' }, [
+      el('button', { type: 'button', class: 'btn btn-secondary', 'data-action': 'reset-cancel' },
+        'Cancel'),
+      el('button', { type: 'button', class: 'btn btn-primary', 'data-action': 'reset-confirm' },
+        'Start fresh'),
+    ]),
+  ]);
+}
+
+export function renderOverview(session, ui = {}) {
   const cur = session.step;
   const seen = new Set();
   const rows = [];
@@ -734,6 +803,7 @@ export function renderOverview(session) {
       ? el('p', { class: 'note note-quiet',
                   text: `Dropped: ${session.state.dropped.join(', ')}` })
       : null,
+    participantsBlock(session),
     el('div', { class: 'block' }, [
       el('label', { class: 'switch' }, [
         el('input', {
@@ -749,9 +819,8 @@ export function renderOverview(session) {
     el('div', { class: 'sheet-actions sheet-actions-stack' }, [
       el('button', { type: 'button', class: 'btn btn-secondary', 'data-action': 'schedule' },
         'Running late? Adjust the schedule'),
-      el('button', { type: 'button', class: 'btn btn-quiet', 'data-action': 'reset' },
-        'End and reset'),
     ]),
+    resetBlock(session, ui),
   ]);
 }
 

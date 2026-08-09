@@ -542,10 +542,16 @@ export function createSession(content, { speed = 1 } = {}) {
 
     /* ---- participants ---- */
 
-    addParticipant(name) {
+    /**
+     * `fromSlotId` marks a late arrival. Someone who joins at Mission 3
+     * is not missing a Minimalism photograph, they were not there — so
+     * coverage counts only from where they came in, and the reminder
+     * stays about real gaps rather than about arithmetic.
+     */
+    addParticipant(name, { fromSlotId = null } = {}) {
       const trimmed = name.trim();
       if (!trimmed) return null;
-      const p = { id: uid(), name: trimmed };
+      const p = { id: uid(), name: trimmed, fromSlotId };
       state.participants.push(p);
       state.collection[p.id] = { title: '', reflection: '', picks: {}, titles: {} };
       commit();
@@ -610,13 +616,31 @@ export function createSession(content, { speed = 1 } = {}) {
         : slots.length - 1;
       const gaps = [];
       for (const p of state.participants) {
-        for (const slot of slots.slice(0, limit + 1)) {
+        const from = p.fromSlotId
+          ? Math.max(0, slots.findIndex((s) => s.id === p.fromSlotId))
+          : 0;
+        for (const slot of slots.slice(from, limit + 1)) {
           if (!api.shortlistFor(p.id, slot.id).length) {
             gaps.push({ participant: p, slot });
           }
         }
       }
       return gaps;
+    },
+
+    /**
+     * The collection slot currently being worked toward — the one a
+     * participant added right now would start from. Theory and transition
+     * steps have no slot of their own, so it looks forward to the next.
+     */
+    currentSlotId() {
+      const slotIds = new Set(api.slots().map((s) => s.id));
+      for (let i = api.step.index; i < steps.length; i += 1) {
+        const s = steps[i];
+        const id = s.segmentType === 'mission' ? s.segmentRef : s.slot;
+        if (id && slotIds.has(id)) return id;
+      }
+      return null;
     },
 
     /* ---- collection ---- */
