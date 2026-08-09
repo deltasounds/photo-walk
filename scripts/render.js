@@ -110,24 +110,21 @@ const section = (title, ...kids) =>
    and its block cost 116px at the top of every screen. Time is context
    for the content, not the content. */
 
-/* ---------- Shortlist capture ------------------------------------------ */
+/* ---------- Recording which photograph ---------------------------------- */
 
 /**
- * Frame-number capture for one collection slot.
+ * One participant's picks for one collection slot.
  *
- * v1 stores no image files. The camera already holds the photographs and
- * the guide already has participants mark favourites in-camera; what is
- * missing at gallery time is knowing *which* frame and *why*. Four digits
- * and a few words solve that, and depend on nothing working on the day.
- */
-/**
- * One participant's capture block.
+ * No image files are stored. The camera holds the photographs; what is
+ * missing at gallery time is knowing *which* one and *why*. A number off
+ * the camera screen and a few words solve that, and depend on nothing
+ * working on the day.
  *
  * Rendered as an independently replaceable unit, keyed by
- * data-capture="<participant>:<slot>". When one child's mark is
- * submitted only their block is rebuilt, so the other child's
- * half-typed frame number survives — with two kids reading numbers out
- * at once, a repaint that clears the other field loses real work.
+ * data-capture="<participant>:<slot>". When one child's entry is
+ * submitted only their block is rebuilt, so the other child's half-typed
+ * number survives — with two kids reading numbers out at once, a repaint
+ * that clears the other field loses real work.
  */
 export function captureRow(session, p, slotId) {
   const entries = session.shortlistFor(p.id, slotId);
@@ -137,7 +134,7 @@ export function captureRow(session, p, slotId) {
       el('p', { class: 'capture-name', text: p.name }),
       el('span', {
         class: `pip ${entries.length ? 'pip-good' : 'pip-empty'}`,
-        text: entries.length ? `${entries.length} marked` : 'none yet',
+        text: entries.length ? `${entries.length} saved` : 'none yet',
       }),
     ]),
     entries.length
@@ -158,31 +155,40 @@ export function captureRow(session, p, slotId) {
       'data-participant': p.id, 'data-slot': slotId,
     }, [
       el('input', {
-        type: 'text', name: 'frame', class: 'in-frame', placeholder: 'Frame',
+        type: 'text', name: 'frame', class: 'in-frame', placeholder: 'Photo no.',
         inputMode: 'numeric', autocomplete: 'off', maxLength: 12,
-        'aria-label': `Frame number for ${p.name}`,
+        'aria-label': `Photo number for ${p.name}`,
       }),
       el('input', {
-        type: 'text', name: 'note', class: 'in-note', placeholder: 'The idea',
+        type: 'text', name: 'note', class: 'in-note', placeholder: 'What they tried',
         autocomplete: 'off', maxLength: 80,
-        'aria-label': `Note for ${p.name}`,
+        'aria-label': `Note for ${p.name} — optional`,
       }),
-      el('button', { type: 'submit', class: 'btn btn-secondary btn-sm', text: 'Mark' }),
+      /* "Add", not "Mark". The guide asks participants to mark favourites
+         ON THE CAMERA; this button records one here. Sharing the verb
+         made it read as though tapping it did something to the camera. */
+      el('button', { type: 'submit', class: 'btn btn-secondary btn-sm', text: 'Add' }),
     ]),
   ]);
 }
 
-export function captureBlock(session, slotId, slotLabel) {
+export function captureBlock(session, slotId) {
   const { participants } = session.state;
 
   if (!participants.length) {
-    return section('Shortlist',
+    return section('Which photograph?',
       el('p', { class: 'hint', text: 'No participants were added at setup.' }));
   }
 
+  /* Plain question, plain answer. "Shortlist" and "frame number" were
+     both borrowed vocabulary — one from editing, one from film — for a
+     moment that is simply: which photo did they pick, and why. The slot
+     name is already in the screen heading above, so it is not repeated. */
   return el('section', { class: 'block' }, [
-    el('h3', { class: 't-block', text: `Shortlist — ${slotLabel}` }),
-    el('p', { class: 'hint', text: 'Frame number from the camera, plus a few words on the idea.' }),
+    el('h3', { class: 't-block', text: 'Which photograph?' }),
+    el('p', { class: 'hint',
+              text: 'The number on the camera screen, and what they were trying. '
+                  + 'The note is optional.' }),
     ...participants.map((p) => captureRow(session, p, slotId)),
   ]);
 }
@@ -213,7 +219,7 @@ function stageWelcome(session, step) {
           sayBlock(c.assignment, 'Read this out'),
           noteBlock(c.assignment_note, 'quiet'),
         ]),
-        captureBlock(session, 'opening', c.slot_label),
+        captureBlock(session, 'opening'),
       ]);
 
     case 'hello':
@@ -351,7 +357,7 @@ function priorGaps(session, step) {
 
   return el('section', { class: 'block' }, [
     el('p', { class: 'note note-warn' }, [
-      el('strong', { text: 'Still nothing marked — ' }),
+      el('strong', { text: 'Still nothing saved — ' }),
       el('span', {
         text: [...byPerson.values()]
           .map(({ name, slots }) => `${name}: ${slots.join(', ')}`).join(' · '),
@@ -420,7 +426,7 @@ function stageMission(session, step, ui) {
       return frag([missionHead(m, { meta: false }),
         sayBlock(m.review_prompt, 'Review prompt'),
         m.review_extra ? noteBlock(m.review_extra, 'quiet') : null,
-        captureBlock(session, step.segmentRef, m.slot_label),
+        captureBlock(session, step.segmentRef),
         priorGaps(session, step),
         section('Then share',
           noteBlock(m.partner_activity ?? copy.facilitation.reminders[2], 'quiet')),
@@ -452,7 +458,7 @@ function stageClosing(session, step) {
         sayBlock(c.assignment, 'Read this out'),
         noteBlock(c.question, 'quiet'),
       ]),
-      captureBlock(session, 'closing', c.slot_label),
+      captureBlock(session, 'closing'),
     ]);
   }
 
@@ -565,7 +571,7 @@ function collectionEditor(session, p, phaseId) {
               el('span', { class: 'choice-frame', text: e.frame || '—' }),
               e.note ? el('span', { class: 'choice-note', text: e.note }) : null,
             ])))
-        : el('p', { class: 'hint', text: 'No candidate marked during the walk.' }),
+        : el('p', { class: 'hint', text: 'Nothing was saved for this one on the walk.' }),
       phaseId === 'sequence' && picked
         ? el('input', {
             type: 'text', class: 'in-title', placeholder: 'Title for this image (optional)',
@@ -591,7 +597,7 @@ function collectionEditor(session, p, phaseId) {
             el('span', { class: 'stem-text', text: session.content.copy.gallery.reflection_stem }),
             el('textarea', {
               class: 'in-reflection', rows: 2, maxLength: 200,
-              placeholder: '…', value: c.reflection ?? '',
+              placeholder: '…in their own words', value: c.reflection ?? '',
               'aria-label': `Reflection for ${p.name}`,
               'data-action': 'reflection', 'data-participant': p.id,
             }),
