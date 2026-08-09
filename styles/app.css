@@ -949,6 +949,10 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
 
 .rehearsal {
   flex: none;
+  display: block;
+  width: 100%;
+  border: 0;
+  cursor: pointer;
   padding: var(--sp-2) var(--gutter);
   padding-top: calc(var(--sp-2) + env(safe-area-inset-top, 0px));
   background: var(--c-warn);

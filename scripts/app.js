@@ -76,9 +76,14 @@ async function boot() {
     /* One line. The amber bar and the word "Rehearsal" already carry the
        warning; the sentence explaining it wrapped to two lines and took
        that space from every screen underneath for the whole run. */
-    $('#rehearsal').textContent = `Rehearsal · ${SPEED}× speed`;
-    $('#rehearsal').hidden = false;
+    const bar = $('#rehearsal');
+    bar.textContent = `Rehearsal · ${SPEED}× speed — tap to leave`;
+    bar.hidden = false;
     document.body.dataset.rehearsal = 'true';
+    /* Drops the query string, which is the only thing keeping it in
+       rehearsal. The real session's state lives under its own key, so
+       leaving lands on whatever the real session was doing. */
+    bar.addEventListener('click', () => { location.href = location.pathname; });
   }
 
   buildSetupScreen();
@@ -166,8 +171,9 @@ function renderMissionPicker() {
   $('#mission-summary').replaceChildren(
     el('p', { class: 'summary-total', text: formatDuration(s.totalMin * 60_000) }),
     el('p', { class: 'summary-line',
-              text: `${s.missions} mission${s.missions === 1 ? '' : 's'} · `
-                  + `${s.perMissionMin || 15} min each` }),
+              text: s.missions
+                ? `${s.missions} mission${s.missions === 1 ? '' : 's'} · ${s.perMissionMin} min each`
+                : 'No missions selected' }),
   );
 
   /* Only shown once the shape differs from the guide's, so it explains
