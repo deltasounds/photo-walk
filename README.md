@@ -76,7 +76,14 @@ adds a collection slot. No code changes.
 seven images rather than breaking. (To drop one *during* a session, use the
 schedule sheet.)
 
-**To change the mission rhythm:** edit `rhythms.mission-15`. All six missions
+**To choose which missions run:** the setup screen. Ten are in the library —
+the six from the facilitator's guide are on by default, and four authored for
+the app are off until they have been tried with a group. Each carries a
+`requires` line ("Direct sun", "Anywhere") so the list can be read against the
+day's route and weather, and the summary shows what the choice costs:
+`7 missions · 2h 35m total · collection of 9 images`.
+
+**To change the mission rhythm:** edit `rhythms.mission-15`. All missions
 share it. A different-length mission is a new rhythm entry.
 
 Each mission is three screens — the brief, the shoot, and

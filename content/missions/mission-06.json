@@ -3,6 +3,8 @@
   "number": 6,
   "title": "Nature Finds a Way",
   "short_name": "Nature in the City",
+  "requires": "Plants, trees, or birds",
+  "provenance": "guide",
   "creative_focus": "Nature in the built environment and visual storytelling",
   "technical_connection": "Shutter speed, aperture, and movement",
   "slot_label": "Nature",

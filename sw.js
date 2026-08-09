@@ -11,7 +11,9 @@
    therefore land on the second load, never mid-session.
    ===================================================================== */
 
-const CACHE = 'photo-walk-v1';
+/* Bump when the precache list changes, so the old set is evicted rather
+   than lingering alongside the new one. */
+const CACHE = 'photo-walk-v2';
 
 const SHELL = [
   './',
@@ -31,6 +33,10 @@ const SHELL = [
   'content/missions/mission-04.json',
   'content/missions/mission-05.json',
   'content/missions/mission-06.json',
+  'content/missions/mission-07.json',
+  'content/missions/mission-08.json',
+  'content/missions/mission-09.json',
+  'content/missions/mission-10.json',
   'content/theory/aperture.json',
   'content/theory/shutter.json',
   'content/theory/iso.json',

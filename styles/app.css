@@ -321,6 +321,69 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   font-size: var(--step-sm);
 }
 
+/* Mission picker. The summary carries the consequence of the choice, so
+   it is styled as a statement rather than a caption. */
+.summary {
+  margin-top: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--c-paper);
+  border-radius: var(--radius-md);
+  font-size: var(--step-sm);
+  font-weight: var(--w-bold);
+  text-align: center;
+}
+
+.pick-list { margin-top: var(--sp-3); }
+.pick { border-top: var(--border-hair) solid var(--c-rule); }
+.pick:first-child { border-top: 0; }
+
+.pick-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-height: var(--tap-min);
+  padding: var(--sp-3) 0;
+  cursor: pointer;
+}
+.pick-label input {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 2px;
+  accent-color: var(--c-accent);
+}
+
+.pick-body { flex: 1; min-width: 0; display: block; }
+.pick-name {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--step-md);
+  font-weight: var(--w-bold);
+}
+.pick-tag {
+  padding: 0 var(--sp-2);
+  background: var(--c-accent-tint);
+  border-radius: var(--radius-pill);
+  font-size: var(--step-xs);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--c-accent);
+}
+.pick-title { display: block; font-size: var(--step-sm); color: var(--c-ink-soft); }
+.pick-req   { display: block; font-size: var(--step-xs); color: var(--c-ink-faint); }
+.pick-min {
+  flex: none;
+  font-size: var(--step-xs);
+  font-weight: var(--w-bold);
+  color: var(--c-ink-faint);
+}
+
+/* Off missions stay legible — they are choices, not disabled controls. */
+.pick-off .pick-name,
+.pick-off .pick-title { color: var(--c-ink-faint); }
+
 .plan-list, #setup-plan { margin-top: var(--sp-3); }
 .plan-list li {
   display: flex;

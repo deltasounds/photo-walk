@@ -3,16 +3,30 @@
   "number": 4,
   "title": "Color Detective",
   "short_name": "Color",
+  "requires": "Anywhere",
+  "provenance": "guide",
   "creative_focus": "Color relationships and visual simplification",
   "technical_connection": "Light, ISO, and exposure",
   "slot_label": "Color",
   "lead_in": null,
   "prompt": "Choose one:",
   "prompt_options": [
-    { "name": "Monochrome", "text": "Use one dominant color or related tones." },
-    { "name": "Color echo", "text": "Repeat the same color in different areas." },
-    { "name": "Color clash", "text": "Combine contrasting colors." },
-    { "name": "Color spotlight", "text": "Isolate one bright color in a neutral scene." }
+    {
+      "name": "Monochrome",
+      "text": "Use one dominant color or related tones."
+    },
+    {
+      "name": "Color echo",
+      "text": "Repeat the same color in different areas."
+    },
+    {
+      "name": "Color clash",
+      "text": "Combine contrasting colors."
+    },
+    {
+      "name": "Color spotlight",
+      "text": "Isolate one bright color in a neutral scene."
+    }
   ],
   "notice": null,
   "questions": [

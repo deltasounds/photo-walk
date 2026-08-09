@@ -83,9 +83,14 @@ they are tidy:
   `stepStartedAt + durationMs − Date.now()`. A `setInterval` countdown drifts
   under load and stops dead when iOS backgrounds the tab or the screen locks
   — which happens many times across two hours in a pocket.
-- **Wake lock is re-acquired on every return to visibility.** The OS drops it
-  whenever the tab hides. A lock that works once and then quietly stops is
-  worse than none, because the facilitator has learned to trust it.
+- **Let the phone sleep.** The wake lock is an option, off by default. It was
+  once justified by "losing your place mid-mission is fatal" — but once the
+  clock became absolute-time and a running session rejoined itself on load, a
+  sleeping phone stopped costing anything: it wakes to the right phase with
+  the right time remaining. Holding the screen on for two hours to save a Face
+  ID glance is a bad trade, and it forced an alarming battery warning onto the
+  setup screen to justify itself. When the lock *is* on it must be re-acquired
+  on every return to visibility, since the OS drops it whenever the tab hides.
 - **Persist on every state change and on `pagehide`.** An accidental reload
   ninety minutes in must not lose the session.
 - **Phases auto-advance; segments never do.** Auto-advancing inside a mission

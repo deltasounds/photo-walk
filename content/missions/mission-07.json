@@ -1,0 +1,44 @@
+{
+  "id": "mission-07",
+  "number": 7,
+  "title": "Chasing Shadows",
+  "short_name": "Shadows",
+  "requires": "Direct sun",
+  "provenance": "authored",
+  "creative_focus": "Light direction, shape, and contrast",
+  "technical_connection": "Exposure and contrast",
+  "slot_label": "Shadows",
+  "lead_in": "This one needs sun. In flat cloud, choose a different mission.",
+  "prompt": "Find a shadow that is more interesting than the thing making it. Photograph the shadow, not the object.",
+  "prompt_options": null,
+  "notice": [
+    "Railings and fences",
+    "Lamp posts",
+    "Leaves on a wall",
+    "Steps and kerbs",
+    "Letters on a sign",
+    "People walking",
+    "Your own shadow",
+    "A shadow bending as it crosses something"
+  ],
+  "questions": [
+    "Where is the light coming from?",
+    "Is the shadow sharp or soft, and why?",
+    "What happens if you leave the object out of the frame completely?",
+    "Would it be stronger from higher up or lower down?",
+    "How does the surface change the shape of the shadow?"
+  ],
+  "technical_reminder": [
+    "Bright sun and deep shadow are a lot for the camera to hold at once. If the shadow goes solid black, that can be the point — but check whether you wanted the detail."
+  ],
+  "safety_note": null,
+  "variation": [
+    {
+      "condition": null,
+      "text": "Make the shadow look like something it is not — an animal, a face, a word."
+    }
+  ],
+  "review_prompt": "Which photograph makes the shadow the subject rather than the leftover?",
+  "partner_activity": "Partners can guess what made each shadow.",
+  "review_extra": null
+}

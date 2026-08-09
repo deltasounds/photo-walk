@@ -11,7 +11,9 @@
    the caret four times a second.
    ===================================================================== */
 
-import { createTicker, createWakeLock, createCue, formatClock, formatDrift } from './clock.js';
+import {
+  createTicker, createWakeLock, createCue, formatClock, formatDrift, formatDuration,
+} from './clock.js';
 import { loadContent, createSession, peekStored, clearStored } from './session.js';
 import {
   renderStage, renderTroubleshooting, renderOverview, renderDriftSheet,
@@ -79,6 +81,7 @@ async function boot() {
   }
 
   buildSetupScreen();
+  renderMissionPicker();
   syncSettingsInputs();
   renderParticipants();
 
@@ -140,6 +143,51 @@ function buildSetupScreen() {
   $('#setup-plan').replaceChildren(...rows);
 }
 
+/**
+ * The mission picker, with what the choice costs.
+ *
+ * The summary line is the point. Turning on four extra missions makes a
+ * 2h20m session into 3h20m, and discovering that at minute ninety would
+ * make this feature worse than not having it. Duration and collection
+ * size update on every toggle.
+ */
+function renderMissionPicker() {
+  const missions = session.allMissions();
+  const active = missions.filter((m) => m.active).length;
+
+  /* realMin, not the running clock — rehearsal speed must not make the
+     planned session look like it takes seven minutes. */
+  const realMinutes = session.steps.reduce((a, s) => a + s.realMin, 0);
+  const slots = session.slots().length;
+
+  $('#mission-summary').textContent =
+    `${active} mission${active === 1 ? '' : 's'} · `
+    + `${formatDuration(realMinutes * 60_000)} total · `
+    + `collection of ${slots} image${slots === 1 ? '' : 's'}`;
+
+  $('#mission-picker').replaceChildren(...missions.map((m) => {
+    const box = el('input', {
+      type: 'checkbox', checked: m.active,
+      'data-action': 'mission-toggle', 'data-ref': m.ref,
+    });
+    return el('li', { class: `pick ${m.active ? '' : 'pick-off'}` }, [
+      el('label', { class: 'pick-label' }, [
+        box,
+        el('span', { class: 'pick-body' }, [
+          el('span', { class: 'pick-name' }, [
+            el('span', { text: m.short_name }),
+            m.provenance === 'authored'
+              ? el('span', { class: 'pick-tag', text: 'new' }) : null,
+          ]),
+          el('span', { class: 'pick-title', text: m.title }),
+          el('span', { class: 'pick-req', text: m.requires ?? '' }),
+        ]),
+        el('span', { class: 'pick-min', text: `${m.min}m` }),
+      ]),
+    ]);
+  }));
+}
+
 /** "Mission 3 · Photograph and explore — Ada, Sam · 7 marked" */
 function describeStored(stored) {
   const where = segmentLabel(session, stored.step);
@@ -167,6 +215,7 @@ function renderParticipants() {
 function syncSettingsInputs() {
   $('#opt-autoadvance').checked = session.state.settings.autoAdvance;
   $('#opt-sound').checked = session.state.settings.sound;
+  $('#opt-wakelock').checked = Boolean(session.state.settings.wakeLock);
 }
 
 /* ---------- Screens ------------------------------------------------------- */
@@ -186,7 +235,7 @@ async function beginRun({ fresh, gesture = true }) {
     else document.addEventListener('pointerdown', () => cue.arm(), { once: true });
   }
   if (fresh) session.start();
-  await wakeLock.enable();
+  if (session.state.settings.wakeLock) await wakeLock.enable();
   showScreen('run');
   onStepChange({ silent: true });
   ticker.start();
@@ -342,6 +391,10 @@ function wireGlobalEvents() {
     session.setSetting('autoAdvance', e.target.checked));
   $('#opt-sound').addEventListener('change', (e) =>
     session.setSetting('sound', e.target.checked));
+  $('#opt-wakelock').addEventListener('change', (e) => {
+    session.setSetting('wakeLock', e.target.checked);
+    if (e.target.checked) wakeLock.enable(); else wakeLock.disable();
+  });
 
   $('#btn-start').addEventListener('click', () => {
     /* Starting fresh replaces whatever was stored. */
@@ -410,6 +463,8 @@ function startFresh() {
   lastPaintedStep = -1;
   ui = { variationRevealed: null, promptRevealed: false,
          galleryParticipant: null, confirmingReset: false };
+  buildSetupScreen();
+  renderMissionPicker();
   renderParticipants();
   syncSettingsInputs();
   $('#resume-note').hidden = true;
@@ -567,6 +622,13 @@ function onDelegatedInput(e) {
   const { action, participant, slot } = target.dataset;
 
   /* These write straight through without a repaint, so the caret stays put. */
+  if (action === 'mission-toggle') {
+    session.setMissionActive(target.dataset.ref, target.checked);
+    renderMissionPicker();
+    buildSetupScreen();
+    return;
+  }
+
   if (action === 'toggle-autoadvance') {
     session.setSetting('autoAdvance', target.checked);
     $('#opt-autoadvance').checked = target.checked;

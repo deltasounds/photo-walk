@@ -31,6 +31,15 @@ export function formatClock(ms) {
   return neg ? `−${body}` : body;
 }
 
+/** "2h 20m" — for plan totals, where hours read better than 140 min. */
+export function formatDuration(ms) {
+  const mins = Math.round(ms / MIN);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (!h) return `${m}m`;
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
+
 /** Whole minutes with an explicit sign: "+6 min", "−2 min", "on time". */
 export function formatDrift(ms) {
   const mins = Math.round(ms / MIN);

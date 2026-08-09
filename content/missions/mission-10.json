@@ -1,0 +1,44 @@
+{
+  "id": "mission-10",
+  "number": 10,
+  "title": "The Other Way Round",
+  "short_name": "Reflections",
+  "requires": "Windows, water, or polished surfaces",
+  "provenance": "authored",
+  "creative_focus": "Reflection, doubling, and layers",
+  "technical_connection": "Focus and viewpoint",
+  "slot_label": "Reflections",
+  "lead_in": null,
+  "prompt": "Find a reflection that shows us something we could not otherwise see from where you are standing.",
+  "prompt_options": null,
+  "notice": [
+    "Puddles",
+    "Shop windows",
+    "Car paint and wing mirrors",
+    "Glass buildings",
+    "Metal poles and bollards",
+    "Still water",
+    "Wet pavement",
+    "A phone screen or sunglasses"
+  ],
+  "questions": [
+    "What is real here, and what is reflected?",
+    "Which of the two do you want sharp?",
+    "What happens if you move one step to the side?",
+    "Can you fill the whole frame with the reflection?",
+    "Would it be stronger upside down?"
+  ],
+  "technical_reminder": [
+    "The camera may focus on the glass when you wanted the reflection, or the other way round. Choose which one matters and focus on it deliberately."
+  ],
+  "safety_note": "Watch the traffic and the pavement behind you — reflections put your back to the street.",
+  "variation": [
+    {
+      "condition": null,
+      "text": "Photograph a puddle so that it is not obvious which way up the photograph should be."
+    }
+  ],
+  "review_prompt": "Which photograph uses the reflection most surprisingly?",
+  "partner_activity": "Partners can guess which way up each photograph was taken.",
+  "review_extra": null
+}

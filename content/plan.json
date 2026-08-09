@@ -5,6 +5,8 @@
 
   "_note": "Segments are the session timeline, in order. To add a mission: drop a file in content/missions/ and add one line to `segments`. The collection slots, the schedule, and the shortlist tracking all derive from this array — nothing is hardcoded to six missions or eight images.",
 
+  "_default_note": "`\"default\": false` means a mission is in the library but not in the session unless chosen at setup. The six from the facilitator's guide are on; the four authored for the app are off until they have been tried with a group. Each mission also carries `requires`, so the picker can be read against the day's route and weather.",
+
   "rhythms": {
     "_rhythm_note": "Three screens, not six. The beats that were only a line to say — the four-minute warning, the optional variation, the final-experiment nudge — are cues that surface on the shoot screen as time runs down, because they change nothing about what the participants are doing. Review, marking and regrouping are one continuous activity for the facilitator, who is circulating between children throughout. Cue times are given as minutes REMAINING so they stay true if a phase is shortened to recover the schedule.",
 
@@ -45,6 +47,11 @@
     { "type": "mission", "ref": "mission-04", "min": 15, "rhythm": "mission-15" },
     { "type": "mission", "ref": "mission-05", "min": 15, "rhythm": "mission-15" },
     { "type": "mission", "ref": "mission-06", "min": 15, "rhythm": "mission-15" },
+
+    { "type": "mission", "ref": "mission-07", "min": 15, "rhythm": "mission-15", "default": false },
+    { "type": "mission", "ref": "mission-08", "min": 15, "rhythm": "mission-15", "default": false },
+    { "type": "mission", "ref": "mission-09", "min": 15, "rhythm": "mission-15", "default": false },
+    { "type": "mission", "ref": "mission-10", "min": 15, "rhythm": "mission-15", "default": false },
 
     { "type": "closing", "ref": "closing", "min": 10, "slot": "closing", "rhythm": "closing-10" },
     { "type": "gallery", "ref": "gallery", "min": 20, "rhythm": "gallery-20" }

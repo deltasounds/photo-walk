@@ -44,11 +44,14 @@
       <div class="panel">
         <h2 class="t-section">Before you start</h2>
         <ul id="setup-checks" class="check-list"></ul>
-        <p class="note note-warn">
-          This phone keeps its screen on for the whole two hours and twenty minutes.
-          Start near a full charge, or carry a power bank — if it dies mid-walk you
-          lose the tool, though the session itself is saved and will still be here.
-        </p>
+      </div>
+
+      <div class="panel">
+        <h2 class="t-section">Missions</h2>
+        <p class="hint">Choose what suits today's route and light. The four at the
+          bottom are extras — written for the app, not yet tried with a group.</p>
+        <p id="mission-summary" class="summary"></p>
+        <ul id="mission-picker" class="pick-list"></ul>
       </div>
 
       <details class="panel panel-quiet">
@@ -72,6 +75,14 @@
         </label>
         <p class="hint">Off by default. Turn it on if you would rather be told than
           have to glance at the phone.</p>
+
+        <label class="switch">
+          <input type="checkbox" id="opt-wakelock">
+          <span>Keep the screen awake</span>
+        </label>
+        <p class="hint">Off by default. Let the phone sleep in your pocket — it comes
+          back to the same phase with the right time left, and the battery lasts
+          the walk.</p>
       </div>
 
       <div id="resume-note" class="notice" hidden>

@@ -1,0 +1,44 @@
+{
+  "id": "mission-09",
+  "number": 9,
+  "title": "High and Low",
+  "short_name": "High and Low",
+  "requires": "Anywhere — works in any weather",
+  "provenance": "authored",
+  "creative_focus": "Viewpoint and perspective",
+  "technical_connection": "Camera height and angle",
+  "slot_label": "Viewpoint",
+  "lead_in": null,
+  "prompt": "Photograph one ordinary thing twice: once from as low as you can safely get, and once from as high as you can safely reach.",
+  "prompt_options": null,
+  "notice": [
+    "Bollards and bins",
+    "Benches",
+    "Kerbs and drain covers",
+    "Doorways",
+    "Bicycles",
+    "Puddles",
+    "Plants pushing through paving",
+    "Your own shoes"
+  ],
+  "questions": [
+    "Which version makes it look bigger, or more important?",
+    "What came into the frame when you moved?",
+    "What disappeared?",
+    "Which one looks least like the way we normally see it?",
+    "Would getting even lower help, or has it stopped improving?"
+  ],
+  "technical_reminder": [
+    "For the high version, hold the camera above your head and tilt it down; for the low one, rest it on the ground. Take the photograph, then look at the screen — do not try to squint through the viewfinder."
+  ],
+  "safety_note": "Crouch or kneel rather than lying down, and check the ground and the traffic before getting low.",
+  "variation": [
+    {
+      "condition": null,
+      "text": "Make an ordinary object look enormous, then make the same object look tiny."
+    }
+  ],
+  "review_prompt": "Which viewpoint makes the ordinary thing most surprising?",
+  "partner_activity": null,
+  "review_extra": null
+}

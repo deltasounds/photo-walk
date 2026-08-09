@@ -1,0 +1,49 @@
+{
+  "id": "mission-08",
+  "number": 8,
+  "title": "Make It Move",
+  "short_name": "Movement",
+  "requires": "Traffic, water, or people passing",
+  "provenance": "authored",
+  "creative_focus": "Movement and time",
+  "technical_connection": "Shutter speed",
+  "slot_label": "Movement",
+  "lead_in": null,
+  "prompt": "Photograph the same moving thing twice: once frozen so we could count the spokes, and once blurred so we can feel it going past.",
+  "prompt_options": null,
+  "notice": [
+    "Cyclists",
+    "Buses and cars",
+    "Running water or a fountain",
+    "Flags and awnings",
+    "Revolving doors",
+    "Feet on stairs",
+    "Pigeons taking off",
+    "A swing or a skateboard"
+  ],
+  "questions": [
+    "Is it sharp, or is it flowing?",
+    "Which version feels faster?",
+    "Did it come towards you or straight across you — and did that change the blur?",
+    "Can you hold still enough, or is there something to lean on?",
+    "Which of the two tells the better story?"
+  ],
+  "technical_reminder": [
+    "A slow shutter records camera shake as well as movement. Brace against a wall, a railing, or a post.",
+    "If nothing is blurring, there may simply be too much light: a larger f-number or a lower ISO will slow the shutter down."
+  ],
+  "safety_note": "Photograph traffic from behind a barrier or well back from the kerb. Nobody steps into the road for a photograph.",
+  "variation": [
+    {
+      "condition": "If the frozen and blurred versions both worked",
+      "text": "Try panning: follow the moving thing with the camera as you press the shutter, so it stays sharp and the background streaks."
+    },
+    {
+      "condition": "If nothing is moving fast enough",
+      "text": "Make the movement yourself — photograph a partner walking, running, or jumping."
+    }
+  ],
+  "review_prompt": "Which photograph makes us feel the movement most?",
+  "partner_activity": null,
+  "review_extra": null
+}

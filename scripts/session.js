@@ -210,16 +210,31 @@ function blankState() {
        they are least able to look at a phone — mid-sentence with a
        child, or still walking to the next spot. The timer running over
        is information; being moved on without asking is a loss of control. */
-    /* Both off by default. Auto-advance takes the session out of the
-       facilitator's hands at the moments she is least able to look at a
-       phone; sound and vibration go off unprompted in front of children
-       and near traffic. Neither should be something she has to discover
-       and switch off — she can switch them on if she wants them. */
-    settings: { autoAdvance: false, sound: false },
+    /* All three off by default.
+       Auto-advance takes the session out of the facilitator's hands at
+       the moments she is least able to look at a phone. Sound and
+       vibration go off unprompted in front of children and near traffic.
+       And the wake lock is no longer worth its battery: once the clock
+       became absolute-time and a running session rejoined itself on
+       load, a sleeping phone stopped costing anything — it wakes to the
+       right phase with the right time remaining. Holding the screen on
+       for two hours to avoid a Face ID glance is a bad trade. */
+    settings: { autoAdvance: false, sound: false, wakeLock: false },
   };
 }
 
 const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+
+/**
+ * Missions in the library but not in the session by default.
+ *
+ * Shipping a mission switched off is what makes it safe to ship one that
+ * has never been run with children: it exists, it can be chosen
+ * deliberately, and it cannot wander into a live workshop by itself.
+ */
+const defaultOff = (plan) => plan.segments
+  .filter((s) => s.type === 'mission' && s.default === false)
+  .map((s) => s.ref);
 
 function readStored(key) {
   let raw;
@@ -273,6 +288,7 @@ export function peekStored(content, speed = 1) {
 export function createSession(content, { speed = 1 } = {}) {
   const storeKey = storeKeyFor(speed);
   let state = blankState();
+  state.dropped = defaultOff(content.plan);
   let steps = buildTimeline(content.plan, content, state.dropped, speed);
   const listeners = new Set();
 
@@ -309,6 +325,40 @@ export function createSession(content, { speed = 1 } = {}) {
     get isLastStep() { return state.stepIndex >= steps.length - 1; },
 
     slots() { return collectionSlots(content.plan, content, state.dropped); },
+
+    /**
+     * Every mission in the library with its on/off state — the setup
+     * picker's data. Distinct from `remainingMissions()`, which is about
+     * cutting one loose mid-walk to recover time.
+     */
+    allMissions() {
+      return content.plan.segments
+        .filter((s) => s.type === 'mission')
+        .map((s) => ({
+          ...content.missions[s.ref],
+          ref: s.ref,
+          min: s.min,
+          active: !state.dropped.includes(s.ref),
+        }));
+    },
+
+    /**
+     * Turns a mission on or off for this session.
+     *
+     * Selection, not the same act as dropping: this happens at setup with
+     * the route and the forecast in mind, where turning something off
+     * should feel free. `dropMission` stays for minute 70, when it is a
+     * sacrifice and has to re-anchor the current position.
+     */
+    setMissionActive(ref, active) {
+      const at = state.dropped.indexOf(ref);
+      if (active && at >= 0) state.dropped.splice(at, 1);
+      else if (!active && at < 0) state.dropped.push(ref);
+      else return;
+      rebuild();
+      state.stepIndex = Math.min(state.stepIndex, steps.length - 1);
+      commit();
+    },
 
     /** Missions still in the plan, in order — used by the drop dialog. */
     remainingMissions() {
@@ -695,6 +745,7 @@ export function createSession(content, { speed = 1 } = {}) {
 
     reset() {
       state = blankState();
+      state.dropped = defaultOff(content.plan);
       rebuild();
       clearStored(speed);
       notify();

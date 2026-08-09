@@ -3,6 +3,8 @@
   "number": 1,
   "title": "Tiny Subject, Big World",
   "short_name": "Minimalism",
+  "requires": "Open space, a plain wall, or sky",
+  "provenance": "guide",
   "creative_focus": "Minimalism and negative space",
   "technical_connection": "Aperture and depth of field",
   "slot_label": "Minimalism",
