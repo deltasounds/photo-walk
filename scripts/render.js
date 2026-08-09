@@ -25,17 +25,31 @@ export function el(tag, props = {}, children = []) {
       node.setAttribute(k, v);
     } else node[k] = v;
   }
-  const kids = Array.isArray(children) ? children : [children];
-  for (const c of kids) {
-    if (c == null || c === false) continue;
-    node.append(typeof c === 'string' ? document.createTextNode(c) : c);
-  }
+  append(node, children);
   return node;
+}
+
+/**
+ * Appends children, flattening nested arrays.
+ *
+ * Without the recursion, passing an array where a single child is
+ * expected reaches `node.append(array)`, which stringifies it to
+ * "[object HTMLQuoteElement],[object HTMLParagraphElement]" on screen
+ * instead of failing loudly. Flattening makes that whole class of
+ * mistake impossible rather than relying on every call site being careful.
+ */
+function append(node, child) {
+  if (child == null || child === false) return;
+  if (Array.isArray(child)) {
+    for (const c of child) append(node, c);
+    return;
+  }
+  node.append(typeof child === 'string' ? document.createTextNode(child) : child);
 }
 
 const frag = (kids) => {
   const f = document.createDocumentFragment();
-  for (const k of kids) if (k) f.append(k);
+  append(f, kids);
   return f;
 };
 
@@ -82,12 +96,37 @@ const section = (title, ...kids) =>
     ...kids,
   ]);
 
-/** The countdown. Hidden from assistive tech — see #live in index.html. */
-export function timer(step) {
-  return el('div', { class: 'timer', 'data-role': 'timer' }, [
-    el('p', { class: 'timer-value', id: 'timer-value', 'aria-hidden': 'true', text: '—' }),
-    el('p', { class: 'timer-label', text: step.phaseLabel ?? '' }),
+/**
+ * The countdown, which is also the pause control.
+ *
+ * Tapping the clock to stop the clock needs no explaining, and it is by
+ * far the largest target on screen — which matters when the reason you
+ * are pausing is that something just demanded your attention.
+ *
+ * The ticking value is hidden from assistive tech; see #live in index.html.
+ */
+export function timer(step, session) {
+  const paused = session.state.status === 'paused';
+  return el('button', {
+    type: 'button',
+    class: 'timer',
+    'data-action': 'toggle-pause',
+    'aria-label': paused ? 'Resume the timer' : 'Pause the timer',
+  }, [
+    el('span', { class: 'timer-value', id: 'timer-value', 'aria-hidden': 'true', text: '—' }),
+    el('span', { class: 'timer-label', text: timerLabel(step, paused) }),
   ]);
+}
+
+/**
+ * Single-phase segments have no phase name, which would leave the line
+ * blank — so it advertises the tap instead. A pause control nobody
+ * knows about is no pause control, and the welcome screen is the first
+ * thing the facilitator sees.
+ */
+export function timerLabel(step, paused) {
+  if (paused) return 'Paused — tap to resume';
+  return step.phaseLabel ?? 'Tap to pause';
 }
 
 /* ---------- Shortlist capture ------------------------------------------ */
@@ -177,10 +216,9 @@ function stageWelcome(session) {
     sayBlock(c.opening_message, 'Opening message'),
     section('Check', bullets(c.checks, 'check-list')),
     section('Safety expectations', bullets(c.safety)),
-    section('Opening assignment', [
+    section('Opening assignment',
       sayBlock(c.assignment, 'Assignment'),
-      noteBlock(c.assignment_note, 'quiet'),
-    ]),
+      noteBlock(c.assignment_note, 'quiet')),
     captureBlock(session, 'opening', c.slot_label),
   ]);
 }
@@ -502,7 +540,7 @@ export function renderStage(session, ui) {
   if (session.state.status === 'done') return stageDone(session);
   const step = session.step;
   return frag([
-    timer(step),
+    timer(step, session),
     el('div', { class: 'stage-body' }, [stageBody(session, step, ui)]),
   ]);
 }
@@ -564,6 +602,18 @@ export function renderOverview(session) {
       ? el('p', { class: 'note note-quiet',
                   text: `Dropped: ${session.state.dropped.join(', ')}` })
       : null,
+    el('div', { class: 'block' }, [
+      el('label', { class: 'switch' }, [
+        el('input', {
+          type: 'checkbox', checked: session.state.settings.autoAdvance,
+          'data-action': 'toggle-autoadvance',
+        }),
+        el('span', { text: 'Advance phases automatically' }),
+      ]),
+      el('p', { class: 'hint', text: session.state.settings.autoAdvance
+        ? 'Phases move on by themselves when time runs out. Missions always wait for you.'
+        : 'Nothing moves on by itself. A phase that runs over counts up in red until you advance it.' }),
+    ]),
     el('div', { class: 'sheet-actions' }, [
       el('button', { type: 'button', class: 'btn btn-secondary', 'data-action': 'toggle-pause' },
         session.state.status === 'paused' ? 'Resume session' : 'Pause session'),

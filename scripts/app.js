@@ -15,7 +15,7 @@ import { createTicker, createWakeLock, createCue, formatClock, formatDrift } fro
 import { loadContent, createSession, peekStored, clearStored } from './session.js';
 import {
   renderStage, renderTroubleshooting, renderOverview, renderDriftSheet,
-  collectionsAsText, segmentLabel, captureRow, el,
+  collectionsAsText, segmentLabel, captureRow, timerLabel, el,
 } from './render.js';
 
 const $ = (sel) => document.querySelector(sel);
@@ -218,6 +218,18 @@ function paint() {
   updateNumbers(Date.now());
 }
 
+/** Updates the clock's paused styling and label without a repaint. */
+function refreshTimer() {
+  const node = stage.querySelector('.timer');
+  if (!node) return;
+  const paused = session.state.status === 'paused';
+  node.toggleAttribute('data-paused', paused);
+  node.setAttribute('aria-label', paused ? 'Resume the timer' : 'Pause the timer');
+  const label = node.querySelector('.timer-label');
+  if (label) label.textContent = timerLabel(session.step, paused);
+  announce(paused ? 'Timer paused.' : 'Timer resumed.');
+}
+
 function updateChrome() {
   if (session.state.status === 'done') {
     $('#bar-segment').textContent = session.content.copy.done.title;
@@ -398,8 +410,11 @@ function onDelegatedClick(e) {
     case 'toggle-pause':
       if (session.state.status === 'paused') session.resume();
       else session.pause();
-      closeSheet();
-      paint();
+      /* Refresh the clock in place rather than repainting: pausing is
+         often exactly when a half-typed frame number is on screen. */
+      if (!sheet.hidden) closeSheet();
+      refreshTimer();
+      updateNumbers(Date.now());
       break;
 
     case 'reset':
@@ -477,6 +492,13 @@ function onDelegatedInput(e) {
   const { action, participant, slot } = target.dataset;
 
   /* These write straight through without a repaint, so the caret stays put. */
+  if (action === 'toggle-autoadvance') {
+    session.setSetting('autoAdvance', target.checked);
+    $('#opt-autoadvance').checked = target.checked;
+    openSheet('Session overview', renderOverview(session));
+    return;
+  }
+
   if (action === 'collection-title') session.setCollectionField(participant, 'title', target.value);
   else if (action === 'reflection')  session.setCollectionField(participant, 'reflection', target.value);
   else if (action === 'image-title') session.setImageTitle(participant, slot, target.value);

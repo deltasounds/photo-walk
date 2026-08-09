@@ -367,8 +367,23 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   margin-inline: auto;
 }
 
-.timer { text-align: center; margin-bottom: var(--sp-4); }
+/* The clock doubles as the pause control — a full-width button styled to
+   look like the display it replaced. */
+.timer {
+  display: block;
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-4);
+  background: transparent;
+  border: var(--border-thick) solid transparent;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  cursor: pointer;
+}
+.timer:active { background: var(--c-paper-alt); }
+
 .timer-value {
+  display: block;
   font-size: var(--step-timer);
   font-weight: var(--w-heavy);
   line-height: 1;
@@ -376,7 +391,9 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   font-variant-numeric: tabular-nums;
 }
 .timer-value.is-over { color: var(--c-warn); }
+
 .timer-label {
+  display: block;
   font-size: var(--step-xs);
   font-weight: var(--w-bold);
   letter-spacing: var(--track-eyebrow);
@@ -384,6 +401,15 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   color: var(--c-ink-faint);
   margin-top: var(--sp-1);
 }
+
+/* Paused has to be unmistakable at a glance — a stopped clock that looks
+   like a running one is worse than no clock. */
+.timer[data-paused] {
+  background: var(--c-warn-tint);
+  border-color: var(--c-warn);
+}
+.timer[data-paused] .timer-value,
+.timer[data-paused] .timer-label { color: var(--c-warn); }
 
 .stage-body > * + * { margin-top: var(--sp-5); }
 
