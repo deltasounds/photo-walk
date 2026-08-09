@@ -8,7 +8,7 @@
   "creative_focus": "Light direction, shape, and contrast",
   "technical_connection": "Exposure and contrast",
   "slot_label": "Shadows",
-  "lead_in": "This one needs sun. In flat cloud, choose a different mission.",
+  "lead_in": null,
   "prompt": "Find a shadow that is more interesting than the thing making it. Photograph the shadow, not the object.",
   "prompt_options": null,
   "notice": [

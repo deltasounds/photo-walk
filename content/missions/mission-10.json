@@ -1,7 +1,7 @@
 {
   "id": "mission-10",
   "number": 10,
-  "title": "The Other Way Round",
+  "title": "Two Places at Once",
   "short_name": "Reflections",
   "requires": "Windows, water, or polished surfaces",
   "provenance": "authored",
@@ -9,7 +9,7 @@
   "technical_connection": "Focus and viewpoint",
   "slot_label": "Reflections",
   "lead_in": null,
-  "prompt": "Find a reflection that shows us something we could not otherwise see from where you are standing.",
+  "prompt": "Find a reflection that shows you something you cannot see by looking straight at it.",
   "prompt_options": null,
   "notice": [
     "Puddles",

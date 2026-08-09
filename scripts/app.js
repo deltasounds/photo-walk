@@ -73,9 +73,10 @@ async function boot() {
   document.querySelector('[data-bind="session-subtitle"]').textContent = content.plan.subtitle ?? '';
 
   if (SPEED > 1) {
-    const total = Math.round(session.totalMs / 60_000);
-    $('#rehearsal').textContent =
-      `Rehearsal — ${SPEED}× speed, whole session in about ${total} min. Not the real thing.`;
+    /* One line. The amber bar and the word "Rehearsal" already carry the
+       warning; the sentence explaining it wrapped to two lines and took
+       that space from every screen underneath for the whole run. */
+    $('#rehearsal').textContent = `Rehearsal · ${SPEED}× speed`;
     $('#rehearsal').hidden = false;
     document.body.dataset.rehearsal = 'true';
   }
