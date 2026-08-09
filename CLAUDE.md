@@ -122,8 +122,22 @@ they are tidy:
 
 ## Do not
 
-- Do not rewrite the workshop content. It comes from the facilitator's guide
-  and is transcribed deliberately, including its exact spoken prompts.
+- Do not rewrite the workshop content on your own initiative. Missions 1–6
+  come from the facilitator's guide and are transcribed deliberately,
+  including their exact spoken prompts. Each mission records its
+  `provenance`: `guide` or `authored`.
+
+  Four lines have since been revised **at Greg's explicit direction**, so the
+  guide missions are no longer verbatim. Originals, for the record:
+
+  | | Original |
+  |---|---|
+  | M1 review | "Which photograph uses the empty space most intentionally?" |
+  | M4 prompt | "Choose one:" |
+  | M5 review | "…turns the building into the strongest arrangement of shapes?" |
+  | M6 prompt | "Show a relationship between nature and the built city." |
+
+  Propose changes like these; do not make them unasked.
 - Do not add a build step, a framework, or a dependency without proposing it
   first and recording the reason in `README.md`.
 - Do not introduce a composite "score", ranking, or any judgement of a child's

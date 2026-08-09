@@ -9,7 +9,7 @@
   "technical_connection": "Light, ISO, and exposure",
   "slot_label": "Color",
   "lead_in": null,
-  "prompt": "Choose one:",
+  "prompt": "Pick one of these, then photograph it:",
   "prompt_options": [
     {
       "name": "Monochrome",
