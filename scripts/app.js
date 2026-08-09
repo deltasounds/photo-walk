@@ -179,16 +179,16 @@ function renderMissionPicker() {
       type: 'checkbox', checked: m.active,
       'data-action': 'mission-toggle', 'data-ref': m.ref,
     });
+    /* Two lines: what it teaches, and what the street has to provide.
+       The evocative title ("City Geometry") is the line said to a child,
+       not a selection criterion — it cannot help answer the only
+       question being asked here, which is whether this fits today's
+       route and light. It still leads the mission screen itself. */
     return el('li', { class: `pick ${m.active ? '' : 'pick-off'}` }, [
       el('label', { class: 'pick-label' }, [
         box,
         el('span', { class: 'pick-body' }, [
-          el('span', { class: 'pick-name' }, [
-            el('span', { text: m.short_name }),
-            m.provenance === 'authored'
-              ? el('span', { class: 'pick-tag', text: 'new' }) : null,
-          ]),
-          el('span', { class: 'pick-title', text: m.title }),
+          el('span', { class: 'pick-name', text: m.short_name }),
           el('span', { class: 'pick-req', text: m.requires ?? '' }),
         ]),
         el('span', { class: 'pick-min', text: `${m.min}m` }),

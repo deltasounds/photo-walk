@@ -373,24 +373,11 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
 
 .pick-body { flex: 1; min-width: 0; display: block; }
 .pick-name {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
+  display: block;
   font-size: var(--step-md);
   font-weight: var(--w-bold);
 }
-.pick-tag {
-  padding: 0 var(--sp-2);
-  background: var(--c-accent-tint);
-  border-radius: var(--radius-pill);
-  font-size: var(--step-xs);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--track-eyebrow);
-  text-transform: uppercase;
-  color: var(--c-accent);
-}
-.pick-title { display: block; font-size: var(--step-sm); color: var(--c-ink-soft); }
-.pick-req   { display: block; font-size: var(--step-xs); color: var(--c-ink-faint); }
+.pick-req { display: block; font-size: var(--step-sm); color: var(--c-ink-faint); }
 .pick-min {
   flex: none;
   font-size: var(--step-xs);
@@ -399,8 +386,7 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
 }
 
 /* Off missions stay legible — they are choices, not disabled controls. */
-.pick-off .pick-name,
-.pick-off .pick-title { color: var(--c-ink-faint); }
+.pick-off .pick-name { color: var(--c-ink-faint); }
 
 .plan-list, #setup-plan { margin-top: var(--sp-3); }
 .plan-list li {
