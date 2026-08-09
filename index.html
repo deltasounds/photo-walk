@@ -47,17 +47,37 @@
       </div>
 
       <div class="panel">
-        <h2 class="t-section">Missions</h2>
-        <p class="hint">Choose what suits today's route and light. The first six come
-          from the facilitator's guide; the rest were written for the app.</p>
+        <h2 class="t-section">Session</h2>
         <div id="mission-summary" class="summary"></div>
-        <ul id="mission-picker" class="pick-list"></ul>
 
-        <label class="switch switch-inset">
-          <input type="checkbox" id="opt-fundamentals" checked>
-          <span>Include the 15-minute fundamentals</span>
-        </label>
-        <p class="hint">Turn it off for a group that has done the theory before.</p>
+        <!-- Every part of the session is a fifteen-minute block, so the
+             optional ones are listed the same way the missions are. -->
+        <ul class="pick-list">
+          <li class="pick">
+            <label class="pick-label">
+              <input type="checkbox" id="opt-fundamentals" checked>
+              <span class="pick-body">
+                <span class="pick-name">Intro with fundamentals</span>
+                <span class="pick-req">Aperture, shutter, ISO and zoom</span>
+              </span>
+              <span class="pick-min">15m</span>
+            </label>
+          </li>
+          <li class="pick">
+            <label class="pick-label">
+              <input type="checkbox" id="opt-gallery" checked>
+              <span class="pick-body">
+                <span class="pick-name">Gallery</span>
+                <span class="pick-req">Choose, sequence and title the collection</span>
+              </span>
+              <span class="pick-min">15m</span>
+            </label>
+          </li>
+        </ul>
+
+        <h3 class="t-block t-block-gap">Missions</h3>
+        <p class="hint">Choose what suits today's route and light.</p>
+        <ul id="mission-picker" class="pick-list"></ul>
 
         <p id="selection-note" class="hint hint-center" hidden>
           This selection is remembered for next time.

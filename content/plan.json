@@ -58,6 +58,7 @@
     { "type": "mission", "ref": "mission-10", "min": 15, "rhythm": "mission-15", "default": false },
 
     { "type": "closing", "ref": "closing", "min": 15, "slot": "closing", "rhythm": "closing-15" },
-    { "type": "gallery", "ref": "gallery", "min": 15, "rhythm": "gallery-15" }
+    { "type": "gallery", "id": "gallery", "optional": true, "ref": "gallery",
+      "min": 15, "rhythm": "gallery-15" }
   ]
 }

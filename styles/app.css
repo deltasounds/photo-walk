@@ -341,15 +341,7 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
   font-size: var(--step-sm);
   font-weight: var(--w-bold);
 }
-/* The arithmetic, shown so the total reads as a consequence of the
-   choice rather than a fixed property of the workshop. */
-.summary-sum {
-  margin-top: var(--sp-1);
-  font-size: var(--step-xs);
-  color: var(--c-ink-faint);
-}
-
-.switch-inset { margin-top: var(--sp-4); }
+.t-block-gap { margin-top: var(--sp-5); }
 
 .pick-list { margin-top: var(--sp-3); }
 .pick { border-top: var(--border-hair) solid var(--c-rule); }
