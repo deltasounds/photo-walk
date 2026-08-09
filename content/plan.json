@@ -4,6 +4,8 @@
   "subtitle": "A city photo walk and a gallery session",
   "_duration_note": "No fixed length is stated anywhere, because there is not one. The session is a formula — the bookend segments plus fifteen minutes per chosen mission — and the setup screen derives and shows the arithmetic. Stating 'two hours' would be wrong the moment a seventh mission is chosen.",
 
+  "_quarter_hour_rule": "EVERY segment is a multiple of fifteen minutes, so every possible total is a clean quarter hour: 2h00, 2h15, 2h30. That is what makes the session schedulable — you can tell a parent when to come back. Keep it. If a segment needs more room, give it another fifteen rather than seven; the phases inside a segment can be any length, only the segment total is constrained. buildTimeline warns in the console if a rhythm stops summing to its segment's `min`.",
+
   "_note": "Segments are the session timeline, in order. To add a mission: drop a file in content/missions/ and add one line to `segments`. The collection slots, the schedule, and the shortlist tracking all derive from this array — nothing is hardcoded to six missions or eight images.",
 
   "_default_note": "`\"default\": false` means a mission is in the library but not in the session unless chosen at setup. The six from the facilitator's guide are on; the four authored for the app are off until they have been tried with a group. Each mission also carries `requires`, so the picker can be read against the day's route and weather.",
@@ -11,14 +13,14 @@
   "rhythms": {
     "_rhythm_note": "Three screens, not six. The beats that were only a line to say — the four-minute warning, the optional variation, the final-experiment nudge — are cues that surface on the shoot screen as time runs down, because they change nothing about what the participants are doing. Review, marking and regrouping are one continuous activity for the facilitator, who is circulating between children throughout. Cue times are given as minutes REMAINING so they stay true if a phase is shortened to recover the schedule.",
 
-    "welcome-10": [
-      { "id": "hello",   "label": "Welcome and safety",  "min": 4 },
-      { "id": "cameras", "label": "Camera check",        "min": 3 },
-      { "id": "opening", "label": "Opening photograph",  "min": 3, "capture": true }
+    "welcome-15": [
+      { "id": "hello",   "label": "Welcome and safety",  "min": 6 },
+      { "id": "cameras", "label": "Camera check",        "min": 4 },
+      { "id": "opening", "label": "Opening photograph",  "min": 5, "capture": true }
     ],
-    "closing-10": [
-      { "id": "return", "label": "Walk back",           "min": 7 },
-      { "id": "final",  "label": "Closing photograph",  "min": 3, "capture": true }
+    "closing-15": [
+      { "id": "return", "label": "Walk back",           "min": 10 },
+      { "id": "final",  "label": "Closing photograph",  "min": 5, "capture": true }
     ],
 
     "mission-15": [
@@ -30,17 +32,17 @@
         ] },
       { "id": "review", "label": "Review, choose and share", "min": 5, "capture": true }
     ],
-    "gallery-20": [
-      { "id": "gather",     "label": "Gather the shortlisted photographs", "min": 5 },
+    "gallery-15": [
+      { "id": "gather",     "label": "Gather the shortlisted photographs", "min": 3 },
       { "id": "select",     "label": "Make final selections",              "min": 5 },
-      { "id": "sequence",   "label": "Sequence and title",                 "min": 5 },
-      { "id": "exhibition", "label": "Mini exhibition",                    "min": 5 }
+      { "id": "sequence",   "label": "Sequence and title",                 "min": 4 },
+      { "id": "exhibition", "label": "Mini exhibition",                    "min": 3 }
     ]
   },
 
   "segments": [
-    { "type": "welcome", "ref": "welcome", "min": 10, "slot": "opening", "rhythm": "welcome-10" },
-    { "type": "theory", "id": "fundamentals", "optional": true, "min": 10,
+    { "type": "welcome", "ref": "welcome", "min": 15, "slot": "opening", "rhythm": "welcome-15" },
+    { "type": "theory", "id": "fundamentals", "optional": true, "min": 15,
       "ref": ["aperture", "shutter", "iso", "zoom", "decision-sequence"] },
 
     { "type": "mission", "ref": "mission-01", "min": 15, "rhythm": "mission-15" },
@@ -55,7 +57,7 @@
     { "type": "mission", "ref": "mission-09", "min": 15, "rhythm": "mission-15", "default": false },
     { "type": "mission", "ref": "mission-10", "min": 15, "rhythm": "mission-15", "default": false },
 
-    { "type": "closing", "ref": "closing", "min": 10, "slot": "closing", "rhythm": "closing-10" },
-    { "type": "gallery", "ref": "gallery", "min": 20, "rhythm": "gallery-20" }
+    { "type": "closing", "ref": "closing", "min": 15, "slot": "closing", "rhythm": "closing-15" },
+    { "type": "gallery", "ref": "gallery", "min": 15, "rhythm": "gallery-15" }
   ]
 }

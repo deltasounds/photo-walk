@@ -132,6 +132,25 @@ export function buildTimeline(plan, content, dropped = [], speed = 1) {
 
     const phases = phasesFor(segment, plan, content);
 
+    /* The quarter-hour rule is what makes the session schedulable, and it
+       is easy to break silently by editing one phase. Everything derives
+       from the phases, so a rhythm that stops summing to its segment's
+       `min` would quietly produce totals like 2h17 with nothing to show
+       which edit did it. */
+    const phaseSum = phases.reduce((a, p) => a + p.min, 0);
+    if (Math.abs(phaseSum - segment.min) > 0.001) {
+      console.warn(
+        `[plan] "${segmentId(segment)}" phases sum to ${phaseSum} min `
+        + `but the segment declares ${segment.min}.`,
+      );
+    }
+    if (phaseSum % 15 !== 0) {
+      console.warn(
+        `[plan] "${segmentId(segment)}" is ${phaseSum} min — not a multiple of 15, `
+        + 'so session totals will stop landing on clean quarter hours.',
+      );
+    }
+
     phases.forEach((phase, i) => {
       const durationMs = scale(phase.min);
       steps.push({
