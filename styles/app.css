@@ -906,6 +906,9 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
 }
 .ov-row-on { background: var(--c-accent-tint); font-weight: var(--w-bold); }
 .ov-label { flex: 1; min-width: 0; font-size: var(--step-sm); }
+/* Condition line on an addable mission — you are choosing against the
+   weather you can actually see from where you are standing. */
+.ov-req { display: block; font-size: var(--step-xs); color: var(--c-ink-faint); }
 .ov-min { flex: none; font-size: var(--step-xs); color: var(--c-ink-faint); }
 
 /* Phases of the segment you are in, so a detour can return to the exact

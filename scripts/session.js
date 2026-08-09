@@ -127,7 +127,7 @@ export function buildTimeline(plan, content, dropped = [], speed = 1) {
      the real thing — only the wall clock shrinks. */
   const scale = (min) => Math.max(1000, Math.round((min * MIN) / speed));
 
-  for (const segment of plan.segments) {
+  for (const [planIndex, segment] of plan.segments.entries()) {
     if (isOptional(segment) && dropped.includes(segmentId(segment))) continue;
 
     const phases = phasesFor(segment, plan, content);
@@ -156,6 +156,9 @@ export function buildTimeline(plan, content, dropped = [], speed = 1) {
       steps.push({
         index: steps.length,
         segmentIndex,
+        /* Position in the plan, not among the survivors. Needed to tell
+           which switched-off missions still lie ahead of you. */
+        planIndex,
         segmentType: segment.type,
         segmentRef: segment.ref,
         slot: segment.slot ?? null,
@@ -504,6 +507,42 @@ export function createSession(content, { speed = 1 } = {}) {
          since cutting a mission to recover time says nothing about how
          the next workshop should be shaped. */
       savePrefs();
+      commit();
+    },
+
+    /**
+     * Switched-off missions that still lie ahead — the mid-walk additions.
+     *
+     * Only ones after the current position: a mission sits at a fixed
+     * place in the plan, so re-enabling an earlier one would insert it
+     * behind the facilitator where it can never run.
+     */
+    addableMissions() {
+      const here = api.step.planIndex;
+      return content.plan.segments
+        .map((s, i) => ({ s, i }))
+        .filter(({ s, i }) => s.type === 'mission'
+                           && i > here
+                           && state.dropped.includes(s.ref))
+        .map(({ s }) => ({ ...content.missions[s.ref], ref: s.ref }));
+    },
+
+    /**
+     * Brings a mission into a session already under way.
+     *
+     * Not remembered as a preference — adding one because the light
+     * turned good says as little about the usual shape as dropping one
+     * under time pressure does.
+     */
+    addMission(ref) {
+      if (!state.dropped.includes(ref)) return;
+      const anchor = api.step;
+      state.dropped = state.dropped.filter((x) => x !== ref);
+      rebuild();
+      const target = steps.find(
+        (s) => s.segmentRef === anchor.segmentRef && s.phaseId === anchor.phaseId,
+      );
+      if (target) state.stepIndex = target.index;
       commit();
     },
 

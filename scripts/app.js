@@ -589,6 +589,13 @@ function onDelegatedClick(e) {
       onStepChange({ silent: true });
       break;
 
+    case 'add-mission':
+      session.addMission(target.dataset.ref);
+      closeSheet();
+      announce('Mission added to the session.');
+      onStepChange({ silent: true });
+      break;
+
     case 'export':
       exportCollections();
       break;

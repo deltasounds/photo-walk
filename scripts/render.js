@@ -839,6 +839,7 @@ export function renderOverview(session, ui = {}) {
 export function renderDriftSheet(session) {
   const driftMin = Math.round(session.drift() / 60000);
   const missions = session.remainingMissions();
+  const addable = session.addableMissions();
 
   return frag([
     el('p', { class: 'lede',
@@ -864,8 +865,29 @@ export function renderDriftSheet(session) {
               el('button', {
                 type: 'button', class: 'ov-row', 'data-action': 'drop', 'data-ref': m.ref,
               }, [
-                el('span', { class: 'ov-label', text: `Mission ${m.number} · ${m.title}` }),
+                el('span', { class: 'ov-label',
+                             text: `Mission ${m.number} · ${m.short_name ?? m.title}` }),
                 el('span', { class: 'ov-min', text: 'remove' }),
+              ]),
+            ]))))
+      : null,
+
+    /* The mirror of dropping. Running early, or a route that turned out
+       to have no horizon but beautiful shadows, wants the same dialog
+       from the other direction — and this is exactly the moment you know
+       which of them today can actually support. */
+    addable.length
+      ? section('Add a mission',
+          el('ul', { class: 'drop-list' }, addable.map((m) =>
+            el('li', {}, [
+              el('button', {
+                type: 'button', class: 'ov-row', 'data-action': 'add-mission', 'data-ref': m.ref,
+              }, [
+                el('span', { class: 'ov-label' }, [
+                  el('span', { text: `Mission ${m.number} · ${m.short_name ?? m.title}` }),
+                  m.requires ? el('span', { class: 'ov-req', text: m.requires }) : null,
+                ]),
+                el('span', { class: 'ov-min', text: '+15m' }),
               ]),
             ]))))
       : null,
