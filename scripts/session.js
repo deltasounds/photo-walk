@@ -210,7 +210,12 @@ function blankState() {
        they are least able to look at a phone — mid-sentence with a
        child, or still walking to the next spot. The timer running over
        is information; being moved on without asking is a loss of control. */
-    settings: { autoAdvance: false, sound: true },
+    /* Both off by default. Auto-advance takes the session out of the
+       facilitator's hands at the moments she is least able to look at a
+       phone; sound and vibration go off unprompted in front of children
+       and near traffic. Neither should be something she has to discover
+       and switch off — she can switch them on if she wants them. */
+    settings: { autoAdvance: false, sound: false },
   };
 }
 

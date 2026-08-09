@@ -667,6 +667,28 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
 
 /* ---------- Gallery ------------------------------------------------------- */
 
+/* Participant switcher for the gallery phases. */
+.tabs {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.tab {
+  min-height: var(--tap-compact);
+  padding: 0 var(--sp-4);
+  background: var(--c-paper);
+  border: var(--border-thick) solid var(--c-rule-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--step-sm);
+  font-weight: var(--w-bold);
+  cursor: pointer;
+}
+.tab-on {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: var(--c-paper);
+}
+
 .slot {
   padding: var(--sp-3) 0;
   border-bottom: var(--border-hair) solid var(--c-rule);

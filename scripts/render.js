@@ -189,19 +189,41 @@ export function captureBlock(session, slotId, slotLabel) {
 
 /* ---------- Stage: welcome --------------------------------------------- */
 
-function stageWelcome(session) {
+/**
+ * The welcome was one 3.5-screen scroll with the frame-number form
+ * 1500px down — four sequential activities stacked on the screen the
+ * facilitator meets while two children wait. It is now three beats, like
+ * everything else.
+ */
+function stageWelcome(session, step) {
   const c = session.content.copy.welcome;
-  return frag([
-    eyebrow('Welcome and camera setup'),
-    el('h2', { class: 't-title', text: c.title }),
-    sayBlock(c.opening_message, 'Opening message'),
-    section('Check', bullets(c.checks, 'check-list')),
-    section('Safety expectations', bullets(c.safety)),
-    section('Opening assignment',
-      sayBlock(c.assignment, 'Assignment'),
-      noteBlock(c.assignment_note, 'quiet')),
-    captureBlock(session, 'opening', c.slot_label),
-  ]);
+
+  switch (step.phaseId) {
+    case 'cameras':
+      return frag([
+        eyebrow('Camera check'),
+        el('h2', { class: 't-title', text: 'Before we set off' }),
+        section('Confirm', bullets(c.checks, 'check-list')),
+      ]);
+
+    case 'opening':
+      return frag([
+        eyebrow('Opening photograph'),
+        el('div', { class: 'brief' }, [
+          sayBlock(c.assignment, 'Read this out'),
+          noteBlock(c.assignment_note, 'quiet'),
+        ]),
+        captureBlock(session, 'opening', c.slot_label),
+      ]);
+
+    case 'hello':
+    default:
+      return frag([
+        eyebrow('Welcome'),
+        el('div', { class: 'brief' }, [sayBlock(c.opening_message, 'Read this out')]),
+        section('Safety expectations', bullets(c.safety)),
+      ]);
+  }
 }
 
 /* ---------- Stage: theory ---------------------------------------------- */
@@ -298,6 +320,46 @@ function cueRail(cues) {
     ])));
 }
 
+/**
+ * Slots from earlier in the walk that still have no candidate.
+ *
+ * Coverage used to appear only in the gallery's first phase, which is
+ * where it is discovered too late — at 2:05 nobody can go back and
+ * photograph a horizon. Shown here, during each review, a gap is still
+ * something the facilitator can act on: send that child looking on the
+ * way to the next location, or accept a shorter collection knowingly.
+ *
+ * The current mission is excluded; it is being filled right now, and
+ * flagging it would cry wolf every single time.
+ */
+function priorGaps(session, step) {
+  const slots = session.slots();
+  const idx = slots.findIndex((s) => s.id === step.segmentRef);
+  if (idx < 1) return null;
+
+  const gaps = session.coverageGaps(slots[idx - 1].id);
+  if (!gaps.length) return null;
+
+  /* Keyed by id, not name — two children called Sam must not merge. */
+  const byPerson = new Map();
+  for (const g of gaps) {
+    if (!byPerson.has(g.participant.id)) {
+      byPerson.set(g.participant.id, { name: g.participant.name, slots: [] });
+    }
+    byPerson.get(g.participant.id).slots.push(g.slot.label);
+  }
+
+  return el('section', { class: 'block' }, [
+    el('p', { class: 'note note-warn' }, [
+      el('strong', { text: 'Still nothing marked — ' }),
+      el('span', {
+        text: [...byPerson.values()]
+          .map(({ name, slots }) => `${name}: ${slots.join(', ')}`).join(' · '),
+      }),
+    ]),
+  ]);
+}
+
 function stageMission(session, step, ui) {
   const m = session.content.missions[step.contentRef];
   if (!m) return el('p', { class: 'hint', text: `Missing mission: ${step.contentRef}` });
@@ -359,6 +421,7 @@ function stageMission(session, step, ui) {
         sayBlock(m.review_prompt, 'Review prompt'),
         m.review_extra ? noteBlock(m.review_extra, 'quiet') : null,
         captureBlock(session, step.segmentRef, m.slot_label),
+        priorGaps(session, step),
         section('Then share',
           noteBlock(m.partner_activity ?? copy.facilitation.reminders[2], 'quiet')),
         el('div', { class: 'nextup' }, [
@@ -379,21 +442,57 @@ function nextUpLine(session, step) {
 
 /* ---------- Stage: closing --------------------------------------------- */
 
-function stageClosing(session) {
+function stageClosing(session, step) {
   const c = session.content.copy.closing;
+
+  if (step.phaseId === 'final') {
+    return frag([
+      eyebrow('Closing photograph'),
+      el('div', { class: 'brief' }, [
+        sayBlock(c.assignment, 'Read this out'),
+        noteBlock(c.question, 'quiet'),
+      ]),
+      captureBlock(session, 'closing', c.slot_label),
+    ]);
+  }
+
   return frag([
-    eyebrow('Return and closing photograph'),
+    eyebrow('Walk back'),
     el('h2', { class: 't-title', text: c.title }),
     el('p', { class: 'lede', text: c.body }),
-    sayBlock(c.assignment, 'Assignment'),
-    noteBlock(c.question, 'quiet'),
-    captureBlock(session, 'closing', c.slot_label),
+    nextUpLine(session, step),
   ]);
 }
 
 /* ---------- Stage: gallery --------------------------------------------- */
 
-function stageGallery(session, step) {
+/**
+ * One participant at a time.
+ *
+ * Stacking every child's eight-slot editor made "Make final selections"
+ * nearly six screens of scrolling for two children — and this is a
+ * five-minute phase. Four children would have been fourteen. The
+ * facilitator works through one child at a time anyway.
+ */
+function participantTabs(session, currentId) {
+  const { participants } = session.state;
+  if (participants.length < 2) return null;
+  return el('div', { class: 'tabs', role: 'tablist' }, participants.map((p) =>
+    el('button', {
+      type: 'button',
+      class: `tab ${p.id === currentId ? 'tab-on' : ''}`,
+      role: 'tab', 'aria-selected': String(p.id === currentId),
+      'data-action': 'gallery-participant', 'data-id': p.id,
+    }, p.name)));
+}
+
+/** Whoever is selected, defaulting to the first participant. */
+function currentParticipant(session, ui) {
+  const { participants } = session.state;
+  return participants.find((p) => p.id === ui.galleryParticipant) ?? participants[0] ?? null;
+}
+
+function stageGallery(session, step, ui) {
   const g = session.content.copy.gallery;
   const phase = g.phases[step.phaseId];
   const head = frag([
@@ -404,19 +503,23 @@ function stageGallery(session, step) {
     noteBlock(phase?.note, 'quiet'),
   ]);
 
-  if (step.phaseId === 'gather') {
-    return frag([head, coverageBlock(session)]);
+  if (step.phaseId === 'gather') return frag([head, coverageBlock(session)]);
+
+  const p = currentParticipant(session, ui);
+  if (!p) {
+    return frag([head, el('p', { class: 'hint', text: 'No participants were added.' })]);
   }
+
   if (step.phaseId === 'select' || step.phaseId === 'sequence') {
-    return frag([head, ...session.state.participants.map((p) =>
-      collectionEditor(session, p, step.phaseId))]);
+    return frag([head, participantTabs(session, p.id),
+      collectionEditor(session, p, step.phaseId)]);
   }
+
   if (step.phaseId === 'exhibition') {
-    return frag([head, ...session.state.participants.map((p) => collectionCard(session, p)),
+    return frag([head, participantTabs(session, p.id), collectionCard(session, p),
       el('div', { class: 'block' }, [
         el('button', {
-          type: 'button', class: 'btn btn-secondary btn-block',
-          'data-action': 'export',
+          type: 'button', class: 'btn btn-secondary btn-block', 'data-action': 'export',
         }, 'Copy all collections as text'),
       ])]);
   }
@@ -541,11 +644,11 @@ function stageDone(session) {
 
 function stageBody(session, step, ui) {
   switch (step.segmentType) {
-    case 'welcome': return stageWelcome(session);
+    case 'welcome': return stageWelcome(session, step);
     case 'theory':  return stageTheory(session, step);
     case 'mission': return stageMission(session, step, ui);
-    case 'closing': return stageClosing(session);
-    case 'gallery': return stageGallery(session, step);
+    case 'closing': return stageClosing(session, step);
+    case 'gallery': return stageGallery(session, step, ui);
     default:        return el('p', { class: 'hint', text: `Unknown segment: ${step.segmentType}` });
   }
 }

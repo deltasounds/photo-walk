@@ -8,6 +8,16 @@
   "rhythms": {
     "_rhythm_note": "Three screens, not six. The beats that were only a line to say — the four-minute warning, the optional variation, the final-experiment nudge — are cues that surface on the shoot screen as time runs down, because they change nothing about what the participants are doing. Review, marking and regrouping are one continuous activity for the facilitator, who is circulating between children throughout. Cue times are given as minutes REMAINING so they stay true if a phase is shortened to recover the schedule.",
 
+    "welcome-10": [
+      { "id": "hello",   "label": "Welcome and safety",  "min": 4 },
+      { "id": "cameras", "label": "Camera check",        "min": 3 },
+      { "id": "opening", "label": "Opening photograph",  "min": 3, "capture": true }
+    ],
+    "closing-10": [
+      { "id": "return", "label": "Walk back",           "min": 7 },
+      { "id": "final",  "label": "Closing photograph",  "min": 3, "capture": true }
+    ],
+
     "mission-15": [
       { "id": "brief",  "label": "The mission",              "min": 1 },
       { "id": "shoot",  "label": "Photograph and explore",   "min": 9, "cues": [
@@ -26,7 +36,7 @@
   },
 
   "segments": [
-    { "type": "welcome", "ref": "welcome", "min": 10, "slot": "opening" },
+    { "type": "welcome", "ref": "welcome", "min": 10, "slot": "opening", "rhythm": "welcome-10" },
     { "type": "theory",  "ref": ["aperture", "shutter", "iso", "zoom", "decision-sequence"], "min": 10 },
 
     { "type": "mission", "ref": "mission-01", "min": 15, "rhythm": "mission-15" },
@@ -36,7 +46,7 @@
     { "type": "mission", "ref": "mission-05", "min": 15, "rhythm": "mission-15" },
     { "type": "mission", "ref": "mission-06", "min": 15, "rhythm": "mission-15" },
 
-    { "type": "closing", "ref": "closing", "min": 10, "slot": "closing" },
+    { "type": "closing", "ref": "closing", "min": 10, "slot": "closing", "rhythm": "closing-10" },
     { "type": "gallery", "ref": "gallery", "min": 20, "rhythm": "gallery-20" }
   ]
 }

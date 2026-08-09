@@ -49,7 +49,7 @@ const wakeLock = createWakeLock();
 const cue      = createCue();
 
 /** Transient view state that is not worth persisting. */
-let ui = { variationRevealed: null, promptRevealed: false };
+let ui = { variationRevealed: null, promptRevealed: false, galleryParticipant: null };
 let lastPaintedStep = -1;
 
 /* ---------- Boot --------------------------------------------------------- */
@@ -446,6 +446,13 @@ function onDelegatedClick(e) {
 
     case 'schedule':
       openSheet('Schedule', renderDriftSheet(session));
+      break;
+
+    /* Deliberately not reset between gallery phases: the facilitator
+       works through one child across select, sequence and exhibition. */
+    case 'gallery-participant':
+      ui.galleryParticipant = target.dataset.id;
+      paint();
       break;
 
     case 'reset':
