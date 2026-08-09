@@ -1,7 +1,8 @@
 {
   "id": "city-photo-walk-v1",
   "title": "City Photography Workshop",
-  "subtitle": "Two-hour photo walk + 20-minute gallery",
+  "subtitle": "A city photo walk and a gallery session",
+  "_duration_note": "No fixed length is stated anywhere, because there is not one. The session is a formula — the bookend segments plus fifteen minutes per chosen mission — and the setup screen derives and shows the arithmetic. Stating 'two hours' would be wrong the moment a seventh mission is chosen.",
 
   "_note": "Segments are the session timeline, in order. To add a mission: drop a file in content/missions/ and add one line to `segments`. The collection slots, the schedule, and the shortlist tracking all derive from this array — nothing is hardcoded to six missions or eight images.",
 
@@ -39,7 +40,8 @@
 
   "segments": [
     { "type": "welcome", "ref": "welcome", "min": 10, "slot": "opening", "rhythm": "welcome-10" },
-    { "type": "theory",  "ref": ["aperture", "shutter", "iso", "zoom", "decision-sequence"], "min": 10 },
+    { "type": "theory", "id": "fundamentals", "optional": true, "min": 10,
+      "ref": ["aperture", "shutter", "iso", "zoom", "decision-sequence"] },
 
     { "type": "mission", "ref": "mission-01", "min": 15, "rhythm": "mission-15" },
     { "type": "mission", "ref": "mission-02", "min": 15, "rhythm": "mission-15" },

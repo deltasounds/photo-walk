@@ -325,13 +325,31 @@ textarea { min-height: 0; line-height: var(--lh-body); resize: vertical; }
    it is styled as a statement rather than a caption. */
 .summary {
   margin-top: var(--sp-3);
-  padding: var(--sp-3);
+  padding: var(--sp-4) var(--sp-3);
   background: var(--c-paper);
   border-radius: var(--radius-md);
-  font-size: var(--step-sm);
-  font-weight: var(--w-bold);
   text-align: center;
 }
+.summary-total {
+  font-size: var(--step-lg);
+  font-weight: var(--w-heavy);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.summary-line {
+  margin-top: var(--sp-2);
+  font-size: var(--step-sm);
+  font-weight: var(--w-bold);
+}
+/* The arithmetic, shown so the total reads as a consequence of the
+   choice rather than a fixed property of the workshop. */
+.summary-sum {
+  margin-top: var(--sp-1);
+  font-size: var(--step-xs);
+  color: var(--c-ink-faint);
+}
+
+.switch-inset { margin-top: var(--sp-4); }
 
 .pick-list { margin-top: var(--sp-3); }
 .pick { border-top: var(--border-hair) solid var(--c-rule); }

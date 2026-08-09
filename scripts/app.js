@@ -155,15 +155,24 @@ function renderMissionPicker() {
   const missions = session.allMissions();
   const active = missions.filter((m) => m.active).length;
 
-  /* realMin, not the running clock — rehearsal speed must not make the
-     planned session look like it takes seven minutes. */
-  const realMinutes = session.steps.reduce((a, s) => a + s.realMin, 0);
-  const slots = session.slots().length;
-
-  $('#mission-summary').textContent =
-    `${active} mission${active === 1 ? '' : 's'} · `
-    + `${formatDuration(realMinutes * 60_000)} total · `
-    + `collection of ${slots} image${slots === 1 ? '' : 's'}`;
+  /* The arithmetic, not a fixed claim. There is no "two-hour workshop":
+     there are the bookends plus fifteen minutes for every mission
+     chosen, and showing the formula lets the facilitator plan the other
+     way round — "I have two hours, so that is four missions". */
+  const s = session.shape();
+  $('#mission-summary').replaceChildren(
+    el('p', { class: 'summary-total', text: formatDuration(s.totalMin * 60_000) }),
+    el('p', { class: 'summary-line',
+              text: `${s.missions} mission${s.missions === 1 ? '' : 's'} · `
+                  + `collection of ${s.slots} image${s.slots === 1 ? '' : 's'}` }),
+    /* Deliberately not enumerating the fixed parts — the fundamentals
+       block can be switched off too, and a list that quietly went stale
+       would undo the point of showing the sum at all. The breakdown
+       lives in "Session plan" below. */
+    el('p', { class: 'summary-sum',
+              text: `${s.fixedMin}m around the missions `
+                  + `+ ${s.missions} × ${s.perMissionMin}m` }),
+  );
 
   $('#mission-picker').replaceChildren(...missions.map((m) => {
     const box = el('input', {
@@ -216,6 +225,7 @@ function syncSettingsInputs() {
   $('#opt-autoadvance').checked = session.state.settings.autoAdvance;
   $('#opt-sound').checked = session.state.settings.sound;
   $('#opt-wakelock').checked = Boolean(session.state.settings.wakeLock);
+  $('#opt-fundamentals').checked = session.isSegmentActive('fundamentals');
 }
 
 /* ---------- Screens ------------------------------------------------------- */
@@ -391,6 +401,11 @@ function wireGlobalEvents() {
     session.setSetting('autoAdvance', e.target.checked));
   $('#opt-sound').addEventListener('change', (e) =>
     session.setSetting('sound', e.target.checked));
+  $('#opt-fundamentals').addEventListener('change', (e) => {
+    session.setSegmentActive('fundamentals', e.target.checked);
+    renderMissionPicker();
+    buildSetupScreen();
+  });
   $('#opt-wakelock').addEventListener('change', (e) => {
     session.setSetting('wakeLock', e.target.checked);
     if (e.target.checked) wakeLock.enable(); else wakeLock.disable();

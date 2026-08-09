@@ -106,6 +106,18 @@ function phasesFor(segment, plan, content) {
  * `dropped` holds mission ids removed mid-session to recover time; they
  * vanish from the timeline and from the collection alike.
  */
+/**
+ * Stable identity for a segment.
+ *
+ * Missions are identified by their content ref; anything else that can be
+ * switched off needs an explicit `id`, because a theory segment's `ref`
+ * is an array of theory cards rather than a single name.
+ */
+export const segmentId = (s) => s.id ?? (Array.isArray(s.ref) ? s.type : s.ref);
+
+/** Segments that can be switched off — missions, plus anything flagged. */
+export const isOptional = (s) => s.type === 'mission' || s.optional === true;
+
 export function buildTimeline(plan, content, dropped = [], speed = 1) {
   const steps = [];
   let offset = 0;
@@ -116,7 +128,7 @@ export function buildTimeline(plan, content, dropped = [], speed = 1) {
   const scale = (min) => Math.max(1000, Math.round((min * MIN) / speed));
 
   for (const segment of plan.segments) {
-    if (segment.type === 'mission' && dropped.includes(segment.ref)) continue;
+    if (isOptional(segment) && dropped.includes(segmentId(segment))) continue;
 
     const phases = phasesFor(segment, plan, content);
 
@@ -343,7 +355,48 @@ export function createSession(content, { speed = 1 } = {}) {
     },
 
     /**
-     * Turns a mission on or off for this session.
+     * The session's shape, as an arithmetic the setup screen can show.
+     *
+     * There is no fixed session length: it is the bookend segments plus
+     * fifteen minutes for every mission chosen. Saying "two hours"
+     * anywhere would be wrong the moment a seventh mission is picked.
+     */
+    shape() {
+      let fixedMin = 0;
+      let missionMin = 0;
+      let missions = 0;
+      const seen = new Set();
+
+      for (const s of steps) {
+        if (seen.has(s.segmentIndex)) continue;
+        seen.add(s.segmentIndex);
+        const segMin = steps
+          .filter((x) => x.segmentIndex === s.segmentIndex)
+          .reduce((a, x) => a + x.realMin, 0);
+        if (s.segmentType === 'mission') {
+          missions += 1;
+          missionMin = segMin;
+        } else {
+          fixedMin += segMin;
+        }
+      }
+
+      return {
+        missions,
+        fixedMin,
+        perMissionMin: missionMin,
+        totalMin: fixedMin + missions * missionMin,
+        slots: api.slots().length,
+      };
+    },
+
+    /** Whether an optional non-mission segment (e.g. theory) is included. */
+    isSegmentActive(id) { return !state.dropped.includes(id); },
+
+    setSegmentActive(id, active) { api.setMissionActive(id, active); },
+
+    /**
+     * Turns a mission — or any optional segment — on or off.
      *
      * Selection, not the same act as dropping: this happens at setup with
      * the route and the forecast in mind, where turning something off
